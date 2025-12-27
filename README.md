@@ -5,7 +5,7 @@ Extract the essence of your logs for LLM analysis.
 Analyzes log files using template extraction (Drain3) and semantic clustering (FastEmbed) to produce token-efficient summaries for LLM consumption. Includes automatic secret/PII redaction for safe external analysis.
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/PLACEHOLDER" width="640" controls>
+  <video src="https://github.com/user-attachments/assets/6315501f-e209-4e33-8647-9b8800891e47" width="640" controls>
     <a href="demos/output/full-demo.mp4">Watch demo</a>
   </video>
 </p>
