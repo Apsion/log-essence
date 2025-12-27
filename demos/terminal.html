@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e1e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Courier New', monospace;
+        }
+
+        .window {
+            background: #2d2d2d;
+            border-radius: 8px;
+            margin: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .titlebar {
+            background: #3c3c3c;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .titlebar-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .titlebar-button.close { background: #ff5f56; }
+        .titlebar-button.minimize { background: #ffbd2e; }
+        .titlebar-button.maximize { background: #27ca40; }
+
+        .titlebar-title {
+            color: #9d9d9d;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
+        .terminal {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #1e1e1e;
+        }
+
+        .terminal-line {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+
+        .prompt {
+            color: #27ca40;
+            white-space: nowrap;
+            margin-right: 8px;
+        }
+
+        .command {
+            color: #f1f1f1;
+        }
+
+        .output {
+            color: #9d9d9d;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .output.error {
+            color: #ff5f56;
+        }
+
+        .output.success {
+            color: #27ca40;
+        }
+
+        .output.highlight {
+            color: #ffbd2e;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #f1f1f1;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        #terminal-input {
+            background: transparent;
+            border: none;
+            color: #f1f1f1;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+            caret-color: transparent;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="titlebar">
+            <div class="titlebar-button close"></div>
+            <div class="titlebar-button minimize"></div>
+            <div class="titlebar-button maximize"></div>
+            <span class="titlebar-title">Terminal — log-essence-demo</span>
+        </div>
+        <div class="terminal" id="terminal">
+            <div class="terminal-line input-line">
+                <span class="prompt">$</span>
+                <input type="text" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
+                <span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('terminal-input');
+
+        // Mock command outputs for demo
+        const mockOutputs = {
+            'cat sample.log | head -100': generateRawLogs(),
+            'cat sample.log': generateRawLogs(),
+            'log-essence sample.log --token-budget 2000': generateLogEssenceOutput(),
+            'log-essence sample.log': generateLogEssenceOutput(),
+            'cat .mcp.json': generateMCPConfig(),
+            'cat ~/.mcp.json': generateMCPConfig(),
+            'clear': null,
+        };
+
+        function generateMCPConfig() {
+            return `{
+  "mcpServers": {
+    "log-essence": {
+      "command": "uvx",
+      "args": ["log-essence", "--serve"]
+    }
+  }
+}
+
+# With this config, you can ask Claude:
+# "Check the logs from /var/log/app.log for errors"
+# "What's causing slow response times in my API?"
+# "Analyze my docker logs and find the crash"`;
+        }
+
+        function generateRawLogs() {
+            return `2025-01-15T10:00:01.234Z [INFO] Application startup complete version=2.4.1 env=production
+2025-01-15T10:00:02.456Z [INFO] Database connection established host=db.prod.internal:5432 pool_size=10
+2025-01-15T10:00:03.789Z [INFO] Cache warmed entries=12847 duration_ms=1245
+2025-01-15T10:00:04.012Z [INFO] Processing request from user=alice@company.com ip=192.168.1.100 method=GET path=/api/users
+2025-01-15T10:00:04.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0
+2025-01-15T10:00:04.567Z [INFO] Request completed user=alice@company.com status=200 duration_ms=312
+2025-01-15T10:00:05.012Z [INFO] Processing request from user=bob@example.org ip=192.168.1.101 method=POST path=/api/orders
+2025-01-15T10:00:05.345Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ODc2NTQzMjEwIn0
+2025-01-15T10:00:05.678Z [INFO] Processing payment user=bob@example.org card=4532015112830366 amount=149.99
+2025-01-15T10:00:05.901Z [DEBUG] Stripe API call api_key=sk_live_FAKE0KEY0FOR0DEMO0ONLY
+2025-01-15T10:00:06.234Z [INFO] Payment processed user=bob@example.org transaction_id=txn_1234567890
+2025-01-15T10:00:06.567Z [INFO] Request completed user=bob@example.org status=201 duration_ms=1555
+2025-01-15T10:00:07.012Z [INFO] Processing request from user=carol@startup.io ip=192.168.1.102 method=GET path=/api/products
+2025-01-15T10:00:07.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTU1NTU1NTU1In0
+2025-01-15T10:00:07.456Z [INFO] Request completed user=carol@startup.io status=200 duration_ms=444
+2025-01-15T10:00:08.012Z [INFO] Processing request from user=dave@enterprise.net ip=192.168.1.103 method=PUT path=/api/profile
+2025-01-15T10:00:08.345Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NDQ0NDQ0NDQ0In0
+2025-01-15T10:00:08.567Z [INFO] Request completed user=dave@enterprise.net status=200 duration_ms=555
+2025-01-15T10:00:09.012Z [INFO] Processing request from user=eve@nonprofit.org ip=192.168.1.104 method=POST path=/api/donations
+2025-01-15T10:00:09.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzMzMzMzMzMzIn0
+2025-01-15T10:00:09.456Z [INFO] Processing payment user=eve@nonprofit.org card=5425233430109903 amount=50.00
+2025-01-15T10:00:09.678Z [DEBUG] Stripe API call api_key=sk_live_FAKE0KEY0FOR0DEMO0ONLY
+2025-01-15T10:00:09.901Z [INFO] Payment processed user=eve@nonprofit.org transaction_id=txn_0987654321
+2025-01-15T10:00:10.123Z [INFO] Request completed user=eve@nonprofit.org status=201 duration_ms=1111
+2025-01-15T10:01:15.345Z [ERROR] Database connection failed: Connection refused
+2025-01-15T10:01:15.456Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:01:15.457Z [ERROR]   File "/app/services/database.py", line 145, in execute_query
+2025-01-15T10:01:15.458Z [ERROR]     connection = self.pool.get_connection()
+2025-01-15T10:01:15.459Z [ERROR]   File "/app/services/database.py", line 89, in get_connection
+2025-01-15T10:01:15.460Z [ERROR]     raise ConnectionError(f"Cannot connect to {self.host}")
+2025-01-15T10:01:15.461Z [ERROR] ConnectionError: Cannot connect to db.prod.internal:5432
+2025-01-15T10:01:16.012Z [WARN] Retry attempt 1/3 for database connection
+2025-01-15T10:01:17.012Z [WARN] Retry attempt 2/3 for database connection
+2025-01-15T10:01:18.012Z [WARN] Retry attempt 3/3 for database connection
+2025-01-15T10:01:19.012Z [INFO] Database connection re-established host=db.prod.internal:5432
+2025-01-15T10:01:20.012Z [INFO] Processing request from user=frank@agency.co ip=192.168.1.105 method=GET path=/api/reports
+2025-01-15T10:01:20.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMjIyMjIyMjIyIn0
+2025-01-15T10:01:20.456Z [INFO] Request completed user=frank@agency.co status=200 duration_ms=444
+2025-01-15T10:01:21.890Z [DEBUG] AWS credentials loaded access_key=AKIAIOSFODNN7EXAMPLE secret=wJalrXUtnFEMI/K7MDENG/bPxRfi
+2025-01-15T10:01:22.012Z [INFO] Processing request from user=grace@hospital.edu ip=192.168.1.106 method=POST path=/api/records
+2025-01-15T10:01:22.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTExMTExMTExIn0
+2025-01-15T10:01:22.456Z [DEBUG] SSN validation ssn=123-45-6789 patient_id=pat_78901
+2025-01-15T10:01:22.678Z [INFO] Request completed user=grace@hospital.edu status=201 duration_ms=666
+2025-01-15T10:01:23.012Z [INFO] Processing request from user=henry@bank.com ip=192.168.1.107 method=GET path=/api/accounts
+2025-01-15T10:01:23.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjY2NjY2NjY2In0
+2025-01-15T10:01:23.456Z [INFO] Request completed user=henry@bank.com status=200 duration_ms=333
+2025-01-15T10:01:24.789Z [DEBUG] GitHub token refresh token=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+2025-01-15T10:02:26.345Z [ERROR] Payment failed for user=ivan@shop.de card=5425233430109903
+2025-01-15T10:02:26.456Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:02:26.457Z [ERROR]   File "/app/services/payments.py", line 234, in process_payment
+2025-01-15T10:02:26.458Z [ERROR]     result = self.stripe.charge(card, amount)
+2025-01-15T10:02:26.459Z [ERROR]   File "/app/services/payments.py", line 156, in charge
+2025-01-15T10:02:26.460Z [ERROR]     raise PaymentError(response.error_message)
+2025-01-15T10:02:26.461Z [ERROR] PaymentError: Card declined - insufficient funds
+2025-01-15T10:02:27.012Z [INFO] Processing request from user=julia@tech.fr ip=192.168.1.108 method=GET path=/api/dashboard
+2025-01-15T10:02:27.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3Nzc3Nzc3Nzc3In0
+2025-01-15T10:02:27.456Z [INFO] Request completed user=julia@tech.fr status=200 duration_ms=567
+2025-01-15T10:02:35.012Z [INFO] Phone verified phone=+1-555-123-4567 user_id=usr_67890
+2025-01-15T10:02:36.345Z [ERROR] Rate limit exceeded ip=203.0.113.42 requests=1500/min endpoint=/api/search
+2025-01-15T10:03:40.567Z [ERROR] Memory allocation failed: OutOfMemoryError
+2025-01-15T10:03:40.568Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:03:40.569Z [ERROR]   File "/app/services/image_processor.py", line 312, in resize_batch
+2025-01-15T10:03:40.570Z [ERROR]     buffer = np.zeros((batch_size, height, width, channels))
+2025-01-15T10:03:40.571Z [ERROR] MemoryError: Unable to allocate 2.00 GiB for array with shape (1000, 1024, 1024, 3)
+2025-01-15T10:03:41.012Z [WARN] GC triggered heap_used=97% freed_mb=1247
+2025-01-15T10:03:42.012Z [INFO] Processing request from user=kate@design.uk ip=192.168.1.109 method=POST path=/api/upload
+2025-01-15T10:03:42.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODg4ODg4ODg4In0
+2025-01-15T10:03:42.456Z [INFO] Request completed user=kate@design.uk status=201 duration_ms=789`;
+        }
+
+        function generateLogEssenceOutput() {
+            return `# Log Analysis Summary
+
+**Format:** docker | **Lines:** 66 | **Patterns:** 12 | **Clusters:** 5
+**Tokens:** 5,847 → 892 | **Reduction:** 85% | **Redactions:** 94
+
+---
+
+## Severity Distribution
+ERROR: 17 | WARN: 8 | INFO: 35 | DEBUG: 6
+
+## Top Patterns
+
+### Cluster 1: Request Processing (35 occurrences)
+- [INFO] \`Processing request <*> <*> <*> status=200\` (28x)
+- [INFO] \`Request completed <*> status=<*> duration=<*>\` (7x)
+
+### Cluster 2: Database Errors (11 occurrences)
+- [ERROR] \`Database connection failed: Connection refused\` (1x)
+- [ERROR] \`ConnectionError: Cannot connect to db.prod.internal:5432\` (1x)
+- [WARN] \`Retry attempt <*> for database connection\` (3x)
+- [ERROR] Traceback: /app/services/database.py:89 → :145 (6x)
+
+### Cluster 3: Payment Flow (9 occurrences)
+- [INFO] \`Processing payment user=[EMAIL:xxxx] card=[CC:xxxx]\` (4x)
+- [DEBUG] \`Stripe API call api_key=[SECRET:xxxx]\` (3x)
+- [ERROR] \`PaymentError: Card declined - insufficient funds\` (1x)
+- Traceback: /app/services/payments.py:156 → :234 (1x)
+
+### Cluster 4: Memory Issues (6 occurrences)
+- [ERROR] \`MemoryError: Unable to allocate 2.00 GiB\` (1x)
+- [WARN] \`GC triggered heap_used=97%\` (1x)
+- Traceback: /app/services/image_processor.py:312 (4x)
+
+### Cluster 5: Auth & Rate Limiting (5 occurrences)
+- [DEBUG] \`Auth token validated\` (3x)
+- [ERROR] \`Rate limit exceeded ip=[IP:xxxx]\` (2x)
+
+*All secrets redacted. Safe for LLM analysis.*`;
+        }
+
+        function addOutput(text, className = '') {
+            const inputLine = terminal.querySelector('.input-line');
+            const output = document.createElement('div');
+            output.className = 'output' + (className ? ' ' + className : '');
+            output.textContent = text;
+            terminal.insertBefore(output, inputLine);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function addCommandLine(command) {
+            const inputLine = terminal.querySelector('.input-line');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = `<span class="prompt">$</span><span class="command">${command}</span>`;
+            terminal.insertBefore(line, inputLine);
+        }
+
+        function executeCommand(command) {
+            addCommandLine(command);
+            input.value = '';
+
+            if (command === 'clear') {
+                const lines = terminal.querySelectorAll('.terminal-line:not(.input-line), .output');
+                lines.forEach(line => line.remove());
+                return;
+            }
+
+            const output = mockOutputs[command];
+            if (output !== undefined && output !== null) {
+                addOutput(output);
+            } else if (command.trim() !== '') {
+                addOutput(`command not found: ${command.split(' ')[0]}`, 'error');
+            }
+
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Handle enter key
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand(input.value);
+            }
+        });
+
+        // Keep focus on input
+        document.addEventListener('click', () => input.focus());
+
+        // Expose API for Playwright
+        window.terminalAPI = {
+            type: async function(text, delay = 50) {
+                for (const char of text) {
+                    input.value += char;
+                    input.dispatchEvent(new Event('input'));
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            },
+            execute: function() {
+                executeCommand(input.value);
+            },
+            clear: function() {
+                executeCommand('clear');
+            },
+            getOutput: function() {
+                return Array.from(terminal.querySelectorAll('.output'))
+                    .map(el => el.textContent)
+                    .join('\n');
+            }
+        };
+    </script>
+</body>
+</html>

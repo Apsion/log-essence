@@ -1,0 +1,31 @@
+2025-12-20T10:00:00.123Z INFO  Starting application server
+2025-12-20T10:00:01.234Z INFO  Database connection established
+2025-12-20T10:00:02.345Z DEBUG Loading configuration from /etc/app/config.yaml
+2025-12-20T10:00:03.456Z INFO  Listening on port 8080
+2025-12-20T10:00:10.567Z INFO  Request received: GET /api/users
+2025-12-20T10:00:10.678Z DEBUG Fetching users from database
+2025-12-20T10:00:10.789Z INFO  Request completed in 222ms
+2025-12-20T10:00:15.890Z INFO  Request received: GET /api/users/123
+2025-12-20T10:00:15.901Z DEBUG Fetching user 123 from database
+2025-12-20T10:00:16.012Z INFO  Request completed in 111ms
+2025-12-20T10:00:20.123Z WARNING Connection pool running low: 5 available
+2025-12-20T10:00:25.234Z ERROR Failed to connect to database: timeout after 30s
+2025-12-20T10:00:25.345Z ERROR Retrying database connection attempt 1/3
+2025-12-20T10:00:30.456Z ERROR Failed to connect to database: timeout after 30s
+2025-12-20T10:00:30.567Z ERROR Retrying database connection attempt 2/3
+2025-12-20T10:00:35.678Z INFO  Database connection re-established
+2025-12-20T10:00:40.789Z INFO  Request received: POST /api/orders
+2025-12-20T10:00:41.890Z DEBUG Processing order for user 456
+2025-12-20T10:00:42.901Z INFO  Order created: order_id=789
+2025-12-20T10:00:42.012Z INFO  Request completed in 1223ms
+2025-12-20T10:00:50.123Z INFO  Request received: GET /api/products
+2025-12-20T10:00:50.234Z DEBUG Fetching products from cache
+2025-12-20T10:00:50.345Z INFO  Request completed in 45ms
+2025-12-20T10:01:00.456Z INFO  Health check: status=healthy
+2025-12-20T10:01:05.567Z INFO  Request received: DELETE /api/sessions/abc
+2025-12-20T10:01:05.678Z DEBUG Invalidating session abc
+2025-12-20T10:01:05.789Z INFO  Request completed in 33ms
+2025-12-20T10:01:10.890Z WARNING High memory usage: 85%
+2025-12-20T10:01:15.901Z CRITICAL Out of memory error in worker process
+2025-12-20T10:01:16.012Z ERROR Worker process crashed, restarting
+2025-12-20T10:01:20.123Z INFO  Worker process restarted successfully

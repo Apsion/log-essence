@@ -1,0 +1,182 @@
+# DEMO FILE: All sensitive values below are FAKE/EXAMPLE data for testing redaction
+# Credit cards use test numbers, API keys are documented examples, emails are fictional
+2025-01-15T10:00:01.234Z [INFO] Application startup complete version=2.4.1 env=production
+2025-01-15T10:00:02.456Z [INFO] Database connection established host=db.prod.internal:5432 pool_size=10
+2025-01-15T10:00:03.789Z [INFO] Redis cache connected host=redis.prod.internal:6379
+2025-01-15T10:00:04.012Z [INFO] Processing request user=alice@company.com ip=192.168.1.100 endpoint=/api/users duration=45ms status=200
+2025-01-15T10:00:04.234Z [INFO] Processing request user=bob@example.org ip=192.168.1.101 endpoint=/api/users duration=52ms status=200
+2025-01-15T10:00:04.456Z [INFO] Processing request user=charlie@startup.io ip=192.168.1.102 endpoint=/api/orders duration=38ms status=200
+2025-01-15T10:00:04.678Z [INFO] Processing request user=david@bigcorp.com ip=192.168.1.103 endpoint=/api/users duration=41ms status=200
+2025-01-15T10:00:04.890Z [INFO] Processing request user=eve@techfirm.net ip=192.168.1.104 endpoint=/api/analytics duration=67ms status=200
+2025-01-15T10:00:05.012Z [INFO] Processing request user=frank@agency.co ip=192.168.1.105 endpoint=/api/billing duration=55ms status=200
+2025-01-15T10:00:05.234Z [INFO] Processing request user=grace@nonprofit.org ip=192.168.1.106 endpoint=/api/users duration=43ms status=200
+2025-01-15T10:00:05.456Z [INFO] Processing request user=henry@consulting.biz ip=192.168.1.107 endpoint=/api/reports duration=89ms status=200
+2025-01-15T10:00:05.678Z [INFO] Processing request user=ivy@design.studio ip=192.168.1.108 endpoint=/api/projects duration=61ms status=200
+2025-01-15T10:00:05.890Z [INFO] Processing request user=jack@freelance.me ip=192.168.1.109 endpoint=/api/invoices duration=47ms status=200
+2025-01-15T10:00:06.012Z [INFO] Processing request user=kate@media.tv ip=192.168.1.110 endpoint=/api/content duration=53ms status=200
+2025-01-15T10:00:06.234Z [INFO] Processing request user=leo@university.edu ip=192.168.1.111 endpoint=/api/courses duration=44ms status=200
+2025-01-15T10:00:06.456Z [INFO] Processing request user=mary@hospital.health ip=192.168.1.112 endpoint=/api/users duration=39ms status=200
+2025-01-15T10:00:06.678Z [INFO] Processing request user=nick@lawfirm.legal ip=192.168.1.113 endpoint=/api/cases duration=71ms status=200
+2025-01-15T10:00:06.890Z [INFO] Processing request user=olivia@retail.shop ip=192.168.1.114 endpoint=/api/products duration=48ms status=200
+2025-01-15T10:00:07.012Z [INFO] Processing request user=peter@finance.bank ip=192.168.1.115 endpoint=/api/accounts duration=56ms status=200
+2025-01-15T10:00:07.234Z [INFO] Processing request user=quinn@research.lab ip=192.168.1.116 endpoint=/api/experiments duration=62ms status=200
+2025-01-15T10:00:07.456Z [INFO] Processing request user=rachel@marketing.ads ip=192.168.1.117 endpoint=/api/campaigns duration=51ms status=200
+2025-01-15T10:00:07.678Z [INFO] Processing request user=sam@logistics.ship ip=192.168.1.118 endpoint=/api/tracking duration=45ms status=200
+2025-01-15T10:00:07.890Z [INFO] Processing request user=tina@realestate.homes ip=192.168.1.119 endpoint=/api/listings duration=58ms status=200
+2025-01-15T10:00:08.012Z [INFO] Processing request user=uma@insurance.cover ip=192.168.1.120 endpoint=/api/claims duration=49ms status=200
+2025-01-15T10:00:08.234Z [INFO] Processing request user=victor@automotive.cars ip=192.168.1.121 endpoint=/api/inventory duration=54ms status=200
+2025-01-15T10:00:08.456Z [INFO] Processing request user=wendy@travel.trips ip=192.168.1.122 endpoint=/api/bookings duration=63ms status=200
+2025-01-15T10:00:08.678Z [INFO] Processing request user=xavier@gaming.play ip=192.168.1.123 endpoint=/api/scores duration=37ms status=200
+2025-01-15T10:00:08.890Z [INFO] Processing request user=yolanda@food.eats ip=192.168.1.124 endpoint=/api/orders duration=46ms status=200
+2025-01-15T10:00:09.012Z [INFO] Processing request user=zack@sports.fit ip=192.168.1.125 endpoint=/api/workouts duration=52ms status=200
+2025-01-15T10:00:09.234Z [DEBUG] Auth token validated user_id=usr_12345 token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U
+2025-01-15T10:00:09.456Z [DEBUG] Auth token validated user_id=usr_12346 token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ODc2NTQzMjEwIn0.xyzABCdef123456789GHIjklMNOpqrSTUvwxYZ
+2025-01-15T10:00:09.678Z [DEBUG] Auth token validated user_id=usr_12347 token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTU1NTU1NTU1In0.qwertyUIOPasdfgHJKLzxcvBNM
+2025-01-15T10:00:09.890Z [DEBUG] Auth token validated user_id=usr_12348 token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NDQ0NDQ0NDQ0In0.mnbvcXZlkjhgFDSApoiuytREWQ
+2025-01-15T10:00:10.012Z [DEBUG] Auth token validated user_id=usr_12349 token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzMzMzMzMzMzIn0.PLOKMijnuhBYGVTFCRDXESZWAQ
+2025-01-15T10:00:10.234Z [INFO] Cache hit key=user:12345 ttl=3600s
+2025-01-15T10:00:10.345Z [INFO] Cache hit key=user:12346 ttl=3600s
+2025-01-15T10:00:10.456Z [INFO] Cache hit key=user:12347 ttl=3600s
+2025-01-15T10:00:10.567Z [INFO] Cache hit key=user:12348 ttl=3600s
+2025-01-15T10:00:10.678Z [INFO] Cache hit key=user:12349 ttl=3600s
+2025-01-15T10:00:10.789Z [INFO] Cache miss key=order:67890
+2025-01-15T10:00:10.890Z [INFO] Cache miss key=order:67891
+2025-01-15T10:00:11.012Z [INFO] Cache miss key=order:67892
+2025-01-15T10:00:11.234Z [INFO] Processing payment user=alice@company.com amount=149.99 card=4532015112830366
+2025-01-15T10:00:11.345Z [DEBUG] Stripe API call api_key=sk_live_51ABC123xyz789DEFghiJKL
+2025-01-15T10:00:11.456Z [INFO] Payment processed transaction_id=txn_98765 status=success
+2025-01-15T10:00:11.567Z [INFO] Processing payment user=bob@example.org amount=299.50 card=5425233430109903
+2025-01-15T10:00:11.678Z [DEBUG] Stripe API call api_key=sk_live_51ABC123xyz789DEFghiJKL
+2025-01-15T10:00:11.789Z [INFO] Payment processed transaction_id=txn_98766 status=success
+2025-01-15T10:00:11.890Z [INFO] Processing payment user=charlie@startup.io amount=49.99 card=4916338506082832
+2025-01-15T10:00:12.012Z [DEBUG] Stripe API call api_key=sk_live_51ABC123xyz789DEFghiJKL
+2025-01-15T10:00:12.123Z [INFO] Payment processed transaction_id=txn_98767 status=success
+2025-01-15T10:00:12.234Z [WARN] Slow database query duration=1234ms query="SELECT * FROM orders WHERE status = 'pending'"
+2025-01-15T10:00:12.345Z [WARN] Slow database query duration=2345ms query="SELECT * FROM analytics WHERE date > '2025-01-01'"
+2025-01-15T10:00:12.456Z [WARN] Slow database query duration=1567ms query="SELECT * FROM users WHERE last_login < '2024-01-01'"
+2025-01-15T10:00:12.567Z [WARN] Slow database query duration=1890ms query="SELECT * FROM sessions WHERE expired = true"
+2025-01-15T10:00:12.678Z [WARN] Slow database query duration=2100ms query="SELECT * FROM logs WHERE level = 'ERROR'"
+2025-01-15T10:00:13.012Z [INFO] Processing request user=alice@company.com ip=192.168.1.100 endpoint=/api/dashboard duration=78ms status=200
+2025-01-15T10:00:13.234Z [INFO] Processing request user=bob@example.org ip=192.168.1.101 endpoint=/api/settings duration=45ms status=200
+2025-01-15T10:00:13.456Z [INFO] Processing request user=charlie@startup.io ip=192.168.1.102 endpoint=/api/profile duration=52ms status=200
+2025-01-15T10:00:13.678Z [INFO] Processing request user=david@bigcorp.com ip=192.168.1.103 endpoint=/api/notifications duration=38ms status=200
+2025-01-15T10:00:13.890Z [INFO] Processing request user=eve@techfirm.net ip=192.168.1.104 endpoint=/api/messages duration=61ms status=200
+2025-01-15T10:00:14.012Z [INFO] Processing request user=frank@agency.co ip=192.168.1.105 endpoint=/api/files duration=89ms status=200
+2025-01-15T10:00:14.234Z [INFO] Processing request user=grace@nonprofit.org ip=192.168.1.106 endpoint=/api/donations duration=54ms status=200
+2025-01-15T10:00:14.456Z [INFO] Processing request user=henry@consulting.biz ip=192.168.1.107 endpoint=/api/clients duration=67ms status=200
+2025-01-15T10:00:14.678Z [ERROR] Database connection failed: Connection refused
+2025-01-15T10:00:14.789Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:00:14.790Z [ERROR]   File "/app/services/database.py", line 145, in execute_query
+2025-01-15T10:00:14.791Z [ERROR]     connection = self.pool.get_connection()
+2025-01-15T10:00:14.792Z [ERROR]   File "/app/services/database.py", line 89, in get_connection
+2025-01-15T10:00:14.793Z [ERROR]     raise ConnectionError(f"Cannot connect to {self.host}:{self.port}")
+2025-01-15T10:00:14.794Z [ERROR] ConnectionError: Cannot connect to db.prod.internal:5432
+2025-01-15T10:00:15.012Z [WARN] Retrying database connection attempt=1/3
+2025-01-15T10:00:16.012Z [WARN] Retrying database connection attempt=2/3
+2025-01-15T10:00:17.012Z [WARN] Retrying database connection attempt=3/3
+2025-01-15T10:00:18.012Z [INFO] Database connection restored
+2025-01-15T10:00:18.234Z [INFO] Processing request user=ivy@design.studio ip=192.168.1.108 endpoint=/api/designs duration=72ms status=200
+2025-01-15T10:00:18.456Z [INFO] Processing request user=jack@freelance.me ip=192.168.1.109 endpoint=/api/contracts duration=58ms status=200
+2025-01-15T10:00:18.678Z [INFO] Processing request user=kate@media.tv ip=192.168.1.110 endpoint=/api/videos duration=94ms status=200
+2025-01-15T10:00:18.890Z [INFO] Processing request user=leo@university.edu ip=192.168.1.111 endpoint=/api/grades duration=41ms status=200
+2025-01-15T10:00:19.012Z [INFO] Processing request user=mary@hospital.health ip=192.168.1.112 endpoint=/api/appointments duration=55ms status=200
+2025-01-15T10:00:19.234Z [INFO] Processing request user=nick@lawfirm.legal ip=192.168.1.113 endpoint=/api/documents duration=63ms status=200
+2025-01-15T10:00:19.456Z [INFO] Processing request user=olivia@retail.shop ip=192.168.1.114 endpoint=/api/cart duration=47ms status=200
+2025-01-15T10:00:19.678Z [INFO] Processing request user=peter@finance.bank ip=192.168.1.115 endpoint=/api/transfers duration=82ms status=200
+2025-01-15T10:00:19.890Z [DEBUG] AWS credentials loaded access_key=AKIAIOSFODNN7EXAMPLE
+2025-01-15T10:00:20.012Z [INFO] S3 upload complete bucket=prod-assets key=uploads/report-001.pdf size=2.4MB
+2025-01-15T10:00:20.234Z [INFO] S3 upload complete bucket=prod-assets key=uploads/report-002.pdf size=1.8MB
+2025-01-15T10:00:20.456Z [INFO] S3 upload complete bucket=prod-assets key=uploads/report-003.pdf size=3.1MB
+2025-01-15T10:00:20.678Z [INFO] S3 upload complete bucket=prod-assets key=uploads/report-004.pdf size=2.7MB
+2025-01-15T10:00:20.890Z [INFO] S3 upload complete bucket=prod-assets key=uploads/report-005.pdf size=1.5MB
+2025-01-15T10:00:21.012Z [DEBUG] GitHub integration token=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+2025-01-15T10:00:21.234Z [INFO] Webhook dispatched url=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXX status=200
+2025-01-15T10:00:21.456Z [INFO] Webhook dispatched url=https://hooks.slack.com/services/T00000000/B00000000/YYYYYYYY status=200
+2025-01-15T10:00:21.678Z [INFO] Webhook dispatched url=https://hooks.slack.com/services/T00000000/B00000000/ZZZZZZZZ status=200
+2025-01-15T10:00:22.012Z [INFO] Processing request user=quinn@research.lab ip=192.168.1.116 endpoint=/api/data duration=156ms status=200
+2025-01-15T10:00:22.234Z [INFO] Processing request user=rachel@marketing.ads ip=192.168.1.117 endpoint=/api/analytics duration=89ms status=200
+2025-01-15T10:00:22.456Z [INFO] Processing request user=sam@logistics.ship ip=192.168.1.118 endpoint=/api/shipments duration=67ms status=200
+2025-01-15T10:00:22.678Z [INFO] Processing request user=tina@realestate.homes ip=192.168.1.119 endpoint=/api/properties duration=73ms status=200
+2025-01-15T10:00:22.890Z [INFO] Processing request user=uma@insurance.cover ip=192.168.1.120 endpoint=/api/policies duration=58ms status=200
+2025-01-15T10:00:23.012Z [INFO] Processing request user=victor@automotive.cars ip=192.168.1.121 endpoint=/api/vehicles duration=61ms status=200
+2025-01-15T10:00:23.234Z [INFO] Processing request user=wendy@travel.trips ip=192.168.1.122 endpoint=/api/flights duration=84ms status=200
+2025-01-15T10:00:23.456Z [INFO] Processing request user=xavier@gaming.play ip=192.168.1.123 endpoint=/api/leaderboard duration=42ms status=200
+2025-01-15T10:00:23.678Z [INFO] Processing request user=yolanda@food.eats ip=192.168.1.124 endpoint=/api/restaurants duration=55ms status=200
+2025-01-15T10:00:23.890Z [INFO] Processing request user=zack@sports.fit ip=192.168.1.125 endpoint=/api/events duration=48ms status=200
+2025-01-15T10:00:24.012Z [ERROR] Payment processing failed user=grace@nonprofit.org card=5425233430109903 error="Card declined"
+2025-01-15T10:00:24.234Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:00:24.235Z [ERROR]   File "/app/services/payments.py", line 234, in process_payment
+2025-01-15T10:00:24.236Z [ERROR]     result = stripe.Charge.create(amount=amount, card=card_token)
+2025-01-15T10:00:24.237Z [ERROR]   File "/app/lib/stripe_client.py", line 67, in create
+2025-01-15T10:00:24.238Z [ERROR]     raise PaymentError(response.error_message)
+2025-01-15T10:00:24.239Z [ERROR] PaymentError: Card declined - insufficient funds
+2025-01-15T10:00:24.456Z [WARN] Customer notification sent email=grace@nonprofit.org subject="Payment Failed"
+2025-01-15T10:00:25.012Z [INFO] Processing request user=alice@company.com ip=192.168.1.100 endpoint=/api/users duration=43ms status=200
+2025-01-15T10:00:25.234Z [INFO] Processing request user=bob@example.org ip=192.168.1.101 endpoint=/api/users duration=51ms status=200
+2025-01-15T10:00:25.456Z [INFO] Processing request user=charlie@startup.io ip=192.168.1.102 endpoint=/api/orders duration=39ms status=200
+2025-01-15T10:00:25.678Z [INFO] Processing request user=david@bigcorp.com ip=192.168.1.103 endpoint=/api/users duration=44ms status=200
+2025-01-15T10:00:25.890Z [INFO] Processing request user=eve@techfirm.net ip=192.168.1.104 endpoint=/api/analytics duration=72ms status=200
+2025-01-15T10:00:26.012Z [INFO] Processing request user=frank@agency.co ip=192.168.1.105 endpoint=/api/billing duration=58ms status=200
+2025-01-15T10:00:26.234Z [INFO] Processing request user=grace@nonprofit.org ip=192.168.1.106 endpoint=/api/users duration=41ms status=200
+2025-01-15T10:00:26.456Z [INFO] Processing request user=henry@consulting.biz ip=192.168.1.107 endpoint=/api/reports duration=86ms status=200
+2025-01-15T10:00:26.678Z [INFO] Processing request user=ivy@design.studio ip=192.168.1.108 endpoint=/api/projects duration=63ms status=200
+2025-01-15T10:00:26.890Z [INFO] Processing request user=jack@freelance.me ip=192.168.1.109 endpoint=/api/invoices duration=49ms status=200
+2025-01-15T10:00:27.012Z [INFO] Cache hit key=session:abc123 ttl=1800s
+2025-01-15T10:00:27.123Z [INFO] Cache hit key=session:def456 ttl=1800s
+2025-01-15T10:00:27.234Z [INFO] Cache hit key=session:ghi789 ttl=1800s
+2025-01-15T10:00:27.345Z [INFO] Cache hit key=session:jkl012 ttl=1800s
+2025-01-15T10:00:27.456Z [INFO] Cache hit key=session:mno345 ttl=1800s
+2025-01-15T10:00:27.567Z [INFO] Cache hit key=session:pqr678 ttl=1800s
+2025-01-15T10:00:27.678Z [INFO] Cache hit key=session:stu901 ttl=1800s
+2025-01-15T10:00:27.789Z [INFO] Cache hit key=session:vwx234 ttl=1800s
+2025-01-15T10:00:28.012Z [DEBUG] SSN validation ssn=123-45-6789 result=valid
+2025-01-15T10:00:28.234Z [DEBUG] SSN validation ssn=987-65-4321 result=valid
+2025-01-15T10:00:28.456Z [DEBUG] Phone verification phone=+1-555-123-4567 status=verified
+2025-01-15T10:00:28.678Z [DEBUG] Phone verification phone=+1-555-987-6543 status=verified
+2025-01-15T10:00:28.890Z [DEBUG] Phone verification phone=+1-555-456-7890 status=verified
+2025-01-15T10:00:29.012Z [INFO] Background job started job_id=job_cleanup_001 type=data_retention
+2025-01-15T10:00:29.234Z [INFO] Background job progress job_id=job_cleanup_001 processed=1000 total=5000
+2025-01-15T10:00:29.456Z [INFO] Background job progress job_id=job_cleanup_001 processed=2000 total=5000
+2025-01-15T10:00:29.678Z [INFO] Background job progress job_id=job_cleanup_001 processed=3000 total=5000
+2025-01-15T10:00:29.890Z [INFO] Background job progress job_id=job_cleanup_001 processed=4000 total=5000
+2025-01-15T10:00:30.012Z [INFO] Background job completed job_id=job_cleanup_001 processed=5000 deleted=1234
+2025-01-15T10:00:30.234Z [ERROR] Rate limit exceeded ip=203.0.113.42 endpoint=/api/search requests=1500/min
+2025-01-15T10:00:30.345Z [ERROR] Rate limit exceeded ip=203.0.113.43 endpoint=/api/search requests=1200/min
+2025-01-15T10:00:30.456Z [ERROR] Rate limit exceeded ip=203.0.113.44 endpoint=/api/login requests=500/min
+2025-01-15T10:00:30.567Z [WARN] Blocking suspicious IP ip=203.0.113.42 reason=rate_limit_abuse duration=3600s
+2025-01-15T10:00:30.678Z [WARN] Blocking suspicious IP ip=203.0.113.43 reason=rate_limit_abuse duration=3600s
+2025-01-15T10:00:30.789Z [WARN] Blocking suspicious IP ip=203.0.113.44 reason=brute_force duration=86400s
+2025-01-15T10:00:31.012Z [INFO] Processing request user=kate@media.tv ip=192.168.1.110 endpoint=/api/content duration=55ms status=200
+2025-01-15T10:00:31.234Z [INFO] Processing request user=leo@university.edu ip=192.168.1.111 endpoint=/api/courses duration=47ms status=200
+2025-01-15T10:00:31.456Z [INFO] Processing request user=mary@hospital.health ip=192.168.1.112 endpoint=/api/users duration=42ms status=200
+2025-01-15T10:00:31.678Z [INFO] Processing request user=nick@lawfirm.legal ip=192.168.1.113 endpoint=/api/cases duration=68ms status=200
+2025-01-15T10:00:31.890Z [INFO] Processing request user=olivia@retail.shop ip=192.168.1.114 endpoint=/api/products duration=51ms status=200
+2025-01-15T10:00:32.012Z [INFO] Processing request user=peter@finance.bank ip=192.168.1.115 endpoint=/api/accounts duration=59ms status=200
+2025-01-15T10:00:32.234Z [INFO] Processing request user=quinn@research.lab ip=192.168.1.116 endpoint=/api/experiments duration=64ms status=200
+2025-01-15T10:00:32.456Z [INFO] Processing request user=rachel@marketing.ads ip=192.168.1.117 endpoint=/api/campaigns duration=53ms status=200
+2025-01-15T10:00:32.678Z [INFO] Processing request user=sam@logistics.ship ip=192.168.1.118 endpoint=/api/tracking duration=46ms status=200
+2025-01-15T10:00:32.890Z [INFO] Processing request user=tina@realestate.homes ip=192.168.1.119 endpoint=/api/listings duration=57ms status=200
+2025-01-15T10:00:33.012Z [ERROR] Memory allocation failed: OutOfMemoryError
+2025-01-15T10:00:33.123Z [ERROR] Traceback (most recent call last):
+2025-01-15T10:00:33.124Z [ERROR]   File "/app/services/image_processor.py", line 312, in resize_image
+2025-01-15T10:00:33.125Z [ERROR]     buffer = numpy.zeros((height, width, 4), dtype=numpy.uint8)
+2025-01-15T10:00:33.126Z [ERROR]   File "/usr/lib/python3.11/site-packages/numpy/core/numeric.py", line 204, in zeros
+2025-01-15T10:00:33.127Z [ERROR]     return empty(shape, dtype, order)
+2025-01-15T10:00:33.128Z [ERROR] numpy.core._exceptions.MemoryError: Unable to allocate 2.00 GiB for array
+2025-01-15T10:00:33.234Z [WARN] Image processing skipped job=img_resize_001 reason=memory_constraints
+2025-01-15T10:00:33.345Z [WARN] Image processing skipped job=img_resize_002 reason=memory_constraints
+2025-01-15T10:00:33.456Z [WARN] Image processing skipped job=img_resize_003 reason=memory_constraints
+2025-01-15T10:00:33.567Z [INFO] Memory usage heap_used=7.8GB heap_max=8.0GB percent=97%
+2025-01-15T10:00:33.678Z [WARN] Memory pressure critical triggering=GC
+2025-01-15T10:00:34.567Z [INFO] GC completed freed=1.2GB duration=890ms heap_used=6.6GB
+2025-01-15T10:00:34.789Z [INFO] Processing request user=uma@insurance.cover ip=192.168.1.120 endpoint=/api/claims duration=52ms status=200
+2025-01-15T10:00:35.012Z [INFO] Processing request user=victor@automotive.cars ip=192.168.1.121 endpoint=/api/inventory duration=56ms status=200
+2025-01-15T10:00:35.234Z [INFO] Processing request user=wendy@travel.trips ip=192.168.1.122 endpoint=/api/bookings duration=61ms status=200
+2025-01-15T10:00:35.456Z [INFO] Processing request user=xavier@gaming.play ip=192.168.1.123 endpoint=/api/scores duration=39ms status=200
+2025-01-15T10:00:35.678Z [INFO] Processing request user=yolanda@food.eats ip=192.168.1.124 endpoint=/api/orders duration=48ms status=200
+2025-01-15T10:00:35.890Z [INFO] Processing request user=zack@sports.fit ip=192.168.1.125 endpoint=/api/workouts duration=54ms status=200
+2025-01-15T10:00:36.012Z [INFO] Health check status=healthy uptime=3h45m12s
+2025-01-15T10:00:36.123Z [INFO] Health check cpu_percent=45 memory_percent=82 disk_percent=61
+2025-01-15T10:00:36.234Z [INFO] Health check active_connections=1234 requests_per_second=567
+2025-01-15T10:00:36.345Z [INFO] Health check database_pool_used=8 database_pool_max=10
+2025-01-15T10:00:36.456Z [INFO] Health check redis_connected=true redis_memory=256MB

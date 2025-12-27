@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+
+# Linting/Type checking
+.ruff_cache/
+.mypy_cache/
+
+# uv (keeping uv.lock tracked for reproducibility)
+
+# OS
+.DS_Store
+
+# Environment variables (keep .env.example, ignore actual .env)
+.env
+.env.local
+.env.*.local
+
+# Streamlit secrets (keep config.toml, ignore secrets)
+.streamlit/secrets.toml
+
+# Generated
+output/
+demos/output/
+
+# Beads task tracking (local-only)
+.beads/
+AGENTS.md
+@AGENTS.md

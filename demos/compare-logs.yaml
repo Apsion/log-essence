@@ -1,0 +1,82 @@
+title: "log-essence: Token-Efficient Log Analysis with Redaction"
+description: "Comparing raw log copy-paste with log-essence's secure, consolidated output"
+viewport: [1280, 720]
+typing_speed: 35
+
+scenes:
+  - id: intro
+    narration: "When you paste raw logs into an LLM, you're exposing sensitive data and wasting tokens on repetitive noise."
+    actions:
+      - type: navigate
+        url: "file://demos/terminal.html"
+      - type: wait
+        duration: 500
+
+  - id: raw-logs
+    narration: "Look at these production logs. They contain emails, credit card numbers, API keys, and stack traces. Pasting this directly into Claude is a security risk."
+    actions:
+      - type: type
+        selector: "#terminal-input"
+        text: "cat sample.log | head -100"
+      - type: execute
+      - type: wait
+        duration: 1000
+      - type: screenshot
+        name: raw-logs
+
+  - id: problems
+    narration: "Notice the exposed Stripe API key, AWS credentials, customer emails, and credit card numbers. This data should never be shared with external services."
+    actions:
+      - type: wait
+        duration: 500
+
+  - id: transition
+    narration: "Now let's see what log-essence does with the same logs."
+    actions:
+      - type: clear
+      - type: wait
+        duration: 500
+
+  - id: log-essence-run
+    narration: "log-essence consolidates logs into token-efficient summaries while automatically redacting sensitive data."
+    actions:
+      - type: type
+        selector: "#terminal-input"
+        text: "log-essence sample.log --token-budget 2000"
+      - type: execute
+      - type: wait
+        duration: 1000
+      - type: screenshot
+        name: log-essence-output
+
+  - id: redaction
+    narration: "All emails, credit cards, API keys, and other secrets are replaced with correlation-preserving hashes. The same email always gets the same hash, so you can still trace user journeys."
+    actions:
+      - type: wait
+        duration: 500
+
+  - id: errors
+    narration: "log-essence also detects error chains and stack traces, showing you the root cause of each failure with file locations and impact analysis."
+    actions:
+      - type: wait
+        duration: 500
+
+  - id: clusters
+    narration: "Repetitive log messages are grouped into semantic clusters. Instead of seeing the same pattern fifty times, you see it once with a count."
+    actions:
+      - type: wait
+        duration: 500
+
+  - id: savings
+    narration: "The result? Eighty-nine percent fewer tokens, zero exposed secrets, and actionable insights Claude can actually use."
+    actions:
+      - type: wait
+        duration: 500
+      - type: screenshot
+        name: final
+
+  - id: outro
+    narration: "Install log-essence today with pip install log-essence, or run it instantly with uvx log-essence."
+    actions:
+      - type: wait
+        duration: 500

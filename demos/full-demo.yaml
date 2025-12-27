@@ -1,0 +1,206 @@
+title: "log-essence: CLI, MCP Server, and Web UI"
+description: "Demonstrating log analysis with automatic secret redaction and token optimization"
+viewport: [1920, 1080]
+typing_speed: 30
+
+scenes:
+  # Part 1: The Problem
+  - id: intro
+    narration: "When analyzing logs with external AI services, you face two challenges: sensitive data that shouldn't leave your machine, and raw logs that consume your context window, increase costs, and can potentially degrade accuracy."
+    actions:
+      - type: navigate
+        url: "file://demos/terminal.html"
+      - type: wait
+        duration: 500
+
+  - id: raw-logs
+    narration: "Here's a typical log file. It contains secrets like API keys and PII like customer emails, mixed with routine status messages."
+    actions:
+      - type: type
+        selector: "#terminal-input"
+        text: "cat sample.log"
+      - type: execute
+      - type: wait
+        duration: 1500
+      - type: screenshot
+        name: raw-logs
+
+  # Part 2: CLI Solution
+  - id: cli-intro
+    narration: "log-essence provides three interfaces, UI, Command Line and MCP server."
+    actions:
+      - type: clear
+      - type: wait
+        duration: 500
+
+  - id: cli-demo
+    narration: "Running log-essence with a token budget analyzes the logs, redacts secrets, groups similar entries, and compresses the output."
+    actions:
+      - type: type
+        selector: "#terminal-input"
+        text: "log-essence sample.log --token-budget 2000"
+      - type: execute
+      - type: wait
+        duration: 1500
+      - type: screenshot
+        name: cli-output
+
+  - id: cli-results
+    narration: "The output shows significant token reduction—often 80% or more. Secrets are replaced with correlation-preserving placeholders, so patterns remain visible."
+    actions:
+      - type: wait
+        duration: 500
+
+  # Part 3: MCP Server
+  - id: mcp-intro
+    narration: "The MCP server integrates with any MCP-compatible client like Claude Desktop, Claude Code, or Cursor—enabling natural language log analysis within your existing workflow."
+    actions:
+      - type: clear
+      - type: wait
+        duration: 500
+
+  - id: mcp-config
+    narration: "Adding log-essence to your MCP configuration requires a few lines. The server runs locally."
+    actions:
+      - type: type
+        selector: "#terminal-input"
+        text: "cat .mcp.json"
+      - type: execute
+      - type: wait
+        duration: 1500
+      - type: screenshot
+        name: mcp-config
+
+  - id: mcp-explain
+    narration: "With MCP configured, your AI assistant can analyze logs. Redaction happens locally before any data leaves your machine."
+    actions:
+      - type: wait
+        duration: 500
+
+  # Part 4: Web UI
+  - id: ui-intro
+    narration: "The web interface provides interactive analysis—no command line required."
+    actions:
+      - type: clear
+      - type: wait
+        duration: 500
+
+  - id: ui-navigate
+    narration: "Running log-essence ui launches a local web interface."
+    actions:
+      - type: navigate
+        url: "http://localhost:8501"
+      - type: wait
+        duration: 2000
+      - type: screenshot
+        name: ui-empty
+
+  - id: ui-paste
+    narration: "Paste logs directly into the text area. The sidebar controls token budget, cluster count, and redaction sensitivity."
+    actions:
+      - type: fill
+        selector: "textarea"
+        text: |
+          2025-01-15T10:00:01.234Z [INFO] Application startup complete version=2.4.1 env=production
+          2025-01-15T10:00:02.456Z [INFO] Database connection established host=db.prod.internal:5432 pool_size=10
+          2025-01-15T10:00:03.789Z [INFO] Cache warmed entries=12847 duration_ms=1245
+          2025-01-15T10:00:04.012Z [INFO] Processing request from user=alice@company.com ip=192.168.1.100 method=GET path=/api/users
+          2025-01-15T10:00:04.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0
+          2025-01-15T10:00:04.567Z [INFO] Request completed user=alice@company.com status=200 duration_ms=312
+          2025-01-15T10:00:05.012Z [INFO] Processing request from user=bob@example.org ip=192.168.1.101 method=POST path=/api/orders
+          2025-01-15T10:00:05.345Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ODc2NTQzMjEwIn0
+          2025-01-15T10:00:05.678Z [INFO] Processing payment user=bob@example.org card=4532015112830366 amount=149.99
+          2025-01-15T10:00:05.901Z [DEBUG] Stripe API call api_key=sk_live_FAKE0KEY0FOR0DEMO0ONLY
+          2025-01-15T10:00:06.234Z [INFO] Payment processed user=bob@example.org transaction_id=txn_1234567890
+          2025-01-15T10:00:06.567Z [INFO] Request completed user=bob@example.org status=201 duration_ms=1555
+          2025-01-15T10:00:07.012Z [INFO] Processing request from user=carol@startup.io ip=192.168.1.102 method=GET path=/api/products
+          2025-01-15T10:00:07.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTU1NTU1NTU1In0
+          2025-01-15T10:00:07.456Z [INFO] Request completed user=carol@startup.io status=200 duration_ms=444
+          2025-01-15T10:00:08.012Z [INFO] Processing request from user=dave@enterprise.net ip=192.168.1.103 method=PUT path=/api/profile
+          2025-01-15T10:00:08.345Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NDQ0NDQ0NDQ0In0
+          2025-01-15T10:00:08.567Z [INFO] Request completed user=dave@enterprise.net status=200 duration_ms=555
+          2025-01-15T10:00:09.012Z [INFO] Processing request from user=eve@nonprofit.org ip=192.168.1.104 method=POST path=/api/donations
+          2025-01-15T10:00:09.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzMzMzMzMzMzIn0
+          2025-01-15T10:00:09.456Z [INFO] Processing payment user=eve@nonprofit.org card=5425233430109903 amount=50.00
+          2025-01-15T10:00:09.678Z [DEBUG] Stripe API call api_key=sk_live_FAKE0KEY0FOR0DEMO0ONLY
+          2025-01-15T10:00:09.901Z [INFO] Payment processed user=eve@nonprofit.org transaction_id=txn_0987654321
+          2025-01-15T10:00:10.123Z [INFO] Request completed user=eve@nonprofit.org status=201 duration_ms=1111
+          2025-01-15T10:01:15.345Z [ERROR] Database connection failed: Connection refused
+          2025-01-15T10:01:15.456Z [ERROR] Traceback (most recent call last):
+          2025-01-15T10:01:15.457Z [ERROR]   File "/app/services/database.py", line 145, in execute_query
+          2025-01-15T10:01:15.458Z [ERROR]     connection = self.pool.get_connection()
+          2025-01-15T10:01:15.459Z [ERROR]   File "/app/services/database.py", line 89, in get_connection
+          2025-01-15T10:01:15.460Z [ERROR]     raise ConnectionError(f"Cannot connect to {self.host}")
+          2025-01-15T10:01:15.461Z [ERROR] ConnectionError: Cannot connect to db.prod.internal:5432
+          2025-01-15T10:01:16.012Z [WARN] Retry attempt 1/3 for database connection
+          2025-01-15T10:01:17.012Z [WARN] Retry attempt 2/3 for database connection
+          2025-01-15T10:01:18.012Z [WARN] Retry attempt 3/3 for database connection
+          2025-01-15T10:01:19.012Z [INFO] Database connection re-established host=db.prod.internal:5432
+          2025-01-15T10:01:20.012Z [INFO] Processing request from user=frank@agency.co ip=192.168.1.105 method=GET path=/api/reports
+          2025-01-15T10:01:20.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMjIyMjIyMjIyIn0
+          2025-01-15T10:01:20.456Z [INFO] Request completed user=frank@agency.co status=200 duration_ms=444
+          2025-01-15T10:01:21.890Z [DEBUG] AWS credentials loaded access_key=AKIAIOSFODNN7EXAMPLE secret=wJalrXUtnFEMI/K7MDENG/bPxRfi
+          2025-01-15T10:01:22.012Z [INFO] Processing request from user=grace@hospital.edu ip=192.168.1.106 method=POST path=/api/records
+          2025-01-15T10:01:22.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTExMTExMTExIn0
+          2025-01-15T10:01:22.456Z [DEBUG] SSN validation ssn=123-45-6789 patient_id=pat_78901
+          2025-01-15T10:01:22.678Z [INFO] Request completed user=grace@hospital.edu status=201 duration_ms=666
+          2025-01-15T10:01:23.012Z [INFO] Processing request from user=henry@bank.com ip=192.168.1.107 method=GET path=/api/accounts
+          2025-01-15T10:01:23.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjY2NjY2NjY2In0
+          2025-01-15T10:01:23.456Z [INFO] Request completed user=henry@bank.com status=200 duration_ms=333
+          2025-01-15T10:01:24.789Z [DEBUG] GitHub token refresh token=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+          2025-01-15T10:02:26.345Z [ERROR] Payment failed for user=ivan@shop.de card=5425233430109903
+          2025-01-15T10:02:26.456Z [ERROR] Traceback (most recent call last):
+          2025-01-15T10:02:26.457Z [ERROR]   File "/app/services/payments.py", line 234, in process_payment
+          2025-01-15T10:02:26.458Z [ERROR]     result = self.stripe.charge(card, amount)
+          2025-01-15T10:02:26.459Z [ERROR]   File "/app/services/payments.py", line 156, in charge
+          2025-01-15T10:02:26.460Z [ERROR]     raise PaymentError(response.error_message)
+          2025-01-15T10:02:26.461Z [ERROR] PaymentError: Card declined - insufficient funds
+          2025-01-15T10:02:27.012Z [INFO] Processing request from user=julia@tech.fr ip=192.168.1.108 method=GET path=/api/dashboard
+          2025-01-15T10:02:27.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3Nzc3Nzc3Nzc3In0
+          2025-01-15T10:02:27.456Z [INFO] Request completed user=julia@tech.fr status=200 duration_ms=567
+          2025-01-15T10:02:35.012Z [INFO] Phone verified phone=+1-555-123-4567 user_id=usr_67890
+          2025-01-15T10:02:36.345Z [ERROR] Rate limit exceeded ip=203.0.113.42 requests=1500/min endpoint=/api/search
+          2025-01-15T10:03:40.567Z [ERROR] Memory allocation failed: OutOfMemoryError
+          2025-01-15T10:03:40.568Z [ERROR] Traceback (most recent call last):
+          2025-01-15T10:03:40.569Z [ERROR]   File "/app/services/image_processor.py", line 312, in resize_batch
+          2025-01-15T10:03:40.570Z [ERROR]     buffer = np.zeros((batch_size, height, width, channels))
+          2025-01-15T10:03:40.571Z [ERROR] MemoryError: Unable to allocate 2.00 GiB for array with shape (1000, 1024, 1024, 3)
+          2025-01-15T10:03:41.012Z [WARN] GC triggered heap_used=97% freed_mb=1247
+          2025-01-15T10:03:42.012Z [INFO] Processing request from user=kate@design.uk ip=192.168.1.109 method=POST path=/api/upload
+          2025-01-15T10:03:42.234Z [DEBUG] Auth token validated token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODg4ODg4ODg4In0
+          2025-01-15T10:03:42.456Z [INFO] Request completed user=kate@design.uk status=201 duration_ms=789
+      - type: wait
+        duration: 1000
+      - type: screenshot
+        name: ui-with-logs
+
+  - id: ui-analyze
+    narration: "Click Analyze to process the logs. The output shows redaction count, token reduction, and processing time."
+    actions:
+      - type: click
+        selector: "[data-testid='stBaseButton-primary']"
+      - type: wait
+        duration: 2500
+      - type: screenshot
+        name: ui-results
+
+  - id: ui-features
+    narration: "Copy the result to paste directly into your LLM conversation. Download options include both markdown and JSON formats."
+    actions:
+      - type: wait
+        duration: 500
+
+  # Part 5: Summary
+  - id: summary
+    narration: "Three interfaces for the same core function: local secret redaction and log compression for LLM-compatible analysis."
+    actions:
+      - type: wait
+        duration: 500
+      - type: screenshot
+        name: summary
+
+  - id: outro
+    narration: "Install with pip install log-essence, or run directly with U V X log-essence."
+    actions:
+      - type: wait
+        duration: 1000
