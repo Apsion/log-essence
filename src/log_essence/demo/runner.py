@@ -132,9 +132,7 @@ class DemoRunner:
 
             # Calculate total duration
             final_time = asyncio.get_event_loop().time()
-            recording.total_duration_ms = int(
-                (final_time - self._recording_start_time) * 1000
-            )
+            recording.total_duration_ms = int((final_time - self._recording_start_time) * 1000)
 
             await context.close()
             await browser.close()

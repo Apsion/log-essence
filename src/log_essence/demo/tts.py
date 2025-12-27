@@ -328,7 +328,7 @@ class FFmpegClient:
             "/api/custom",
             json={
                 "file_id": video_file_id,
-                "command": f"-vf \"{drawtext}\"",
+                "command": f'-vf "{drawtext}"',
                 "output_format": output_format,
             },
         )
@@ -391,7 +391,7 @@ class FFmpegClient:
             "/api/custom",
             json={
                 "file_id": video_file_id,
-                "command": f"-vf \"{filter_chain}\"",
+                "command": f'-vf "{filter_chain}"',
                 "output_format": output_format,
             },
         )

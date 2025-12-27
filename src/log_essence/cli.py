@@ -428,9 +428,16 @@ def main() -> int:
             # Parse optional flags
             open_browser = "--no-browser" not in sys.argv
             port = 8501
-            for arg in sys.argv:
+            args_list = sys.argv[2:]  # Skip 'log-essence' and 'ui'
+            i = 0
+            while i < len(args_list):
+                arg = args_list[i]
                 if arg.startswith("--port="):
                     port = int(arg.split("=")[1])
+                elif arg == "--port" and i + 1 < len(args_list):
+                    port = int(args_list[i + 1])
+                    i += 1  # Skip the value
+                i += 1
 
             launch_ui(open_browser=open_browser, port=port)
             return 0

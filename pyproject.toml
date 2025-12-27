@@ -1,7 +1,7 @@
 [project]
 name = "log-essence"
-version = "0.1.0b1"
-description = "Intelligent log analysis for LLMs - extract patterns, redact secrets, compress 80-95%"
+dynamic = ["version"]
+description = "Intelligent log analysis for LLMs - extract patterns, redact secrets, compress 50%+"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -67,8 +67,14 @@ Issues = "https://github.com/petebytes/log-essence/issues"
 log-essence = "log_essence.cli:main"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/log_essence/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/log_essence"]
@@ -76,6 +82,7 @@ packages = ["src/log_essence"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+exclude = ["src/log_essence/_version.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]

@@ -6,7 +6,7 @@ Analyzes log files using template extraction (Drain3) and semantic clustering (F
 
 <p align="center">
   <video src="https://github.com/user-attachments/assets/6315501f-e209-4e33-8647-9b8800891e47" width="640" controls>
-    <a href="demos/output/full-demo.mp4">Watch demo</a>
+    <a href="https://github.com/petebytes/log-essence/blob/main/demos/output/full-demo.mp4">Watch demo</a>
   </video>
 </p>
 
@@ -57,6 +57,12 @@ log-essence /var/log/app.log --redact strict
 # Disable redaction (for internal logs only)
 log-essence /var/log/app.log --no-redact
 
+# JSON output for programmatic use
+log-essence /var/log/app.log -o json
+
+# Watch mode for live log monitoring
+log-essence /var/log/app.log --watch --interval 5
+
 # Run as MCP server
 log-essence --serve
 ```
@@ -71,7 +77,13 @@ log-essence --serve
 | `--since TIME` | Only logs since TIME (1h, 30m, 2d, 2025-01-01) |
 | `--redact MODE` | Redaction: strict, moderate (default), minimal, disabled |
 | `--no-redact` | Disable redaction |
+| `-o, --output FORMAT` | Output format: markdown (default) or json |
+| `-w, --watch` | Watch log file for changes (live updates) |
+| `--interval SECONDS` | Update interval for watch mode (default: 3.0) |
+| `--config FILE` | Path to config file |
+| `--profile NAME` | Use named configuration profile |
 | `--serve` | Run as MCP server |
+| `--version` | Show version number |
 
 ## Web UI
 

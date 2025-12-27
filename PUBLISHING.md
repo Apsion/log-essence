@@ -9,10 +9,6 @@ Before publishing, ensure:
 - [ ] All tests pass: `uv run pytest`
 - [ ] Linting passes: `uv run ruff check src/ tests/`
 - [ ] Formatting correct: `uv run ruff format --check src/ tests/`
-- [ ] Version updated in `src/log_essence/__init__.py` and `pyproject.toml`
-- [ ] GitHub URLs updated in `pyproject.toml`
-- [ ] Author email updated in `pyproject.toml`
-- [ ] README.md GitHub URLs updated
 - [ ] `uv.lock` committed (for reproducibility)
 
 ## GitHub Repository Setup
@@ -29,7 +25,7 @@ git push -u origin main
 
 **Description** (one-line for GitHub):
 ```
-Intelligent log analysis for LLMs - extract patterns, redact secrets, compress 80-95%. CLI, Web UI, and MCP server.
+Intelligent log analysis for LLMs - extract patterns, redact secrets, compress 50%+. CLI, Web UI, and MCP server.
 ```
 
 **Topics** (GitHub tags - add these in repository settings):
@@ -82,28 +78,26 @@ This is the modern, secure way to publish from GitHub Actions without API tokens
 
 ## Publishing Process
 
-### Option A: Automated Release (Recommended)
+### Automated Release
 
-1. **Update version** in both files:
-   - `pyproject.toml`: `version = "0.2.0"`
-   - `src/log_essence/__init__.py`: `__version__ = "0.2.0"`
+Publishing is fully automated. Version is derived from git tags via `hatch-vcs`:
 
-2. **Commit and tag**:
-   ```bash
-   git add -A
-   git commit -m "chore: bump version to 0.2.0"
-   git tag v0.2.0
-   git push origin main --tags
-   ```
+```bash
+git tag v0.2.0
+git push origin main --tags
+```
 
-3. **Create GitHub Release**:
-   - Go to Releases → Draft new release
-   - Choose tag `v0.2.0`
-   - Title: `v0.2.0`
-   - Generate release notes or write changelog
-   - Publish release
+**That's it!** GitHub Actions will automatically:
+- Run tests (fails fast if tests don't pass)
+- Build the package (version from tag)
+- Publish to PyPI via trusted publishing
+- Create a GitHub Release with auto-generated notes
 
-4. GitHub Actions will automatically build and publish to PyPI.
+### Version Format
+
+- Release: `v0.2.0` → PyPI version `0.2.0`
+- Beta: `v0.2.0b1` → PyPI version `0.2.0b1`
+- Dev builds show commit info: `0.2.0.dev3+g1234567`
 
 ### Option B: Manual Publish
 
@@ -169,18 +163,11 @@ Intelligent log analysis tool that makes logs LLM-friendly. Uses Drain3 template
 
 ## Version Numbering
 
-Follow [Semantic Versioning](https://semver.org/):
-- MAJOR.MINOR.PATCH
-- 0.x.y for initial development
-- 1.0.0 when stable and public API is locked
+Version is automatically derived from git tags via `hatch-vcs`. Follow [Semantic Versioning](https://semver.org/):
 
-Current: `0.1.0` (initial release)
-
-Suggested progression:
-- `0.1.0` - Initial release
-- `0.1.1` - Bug fixes
-- `0.2.0` - New features (non-breaking)
-- `1.0.0` - Stable release with API guarantees
+- Tag format: `v{MAJOR}.{MINOR}.{PATCH}` (e.g., `v0.2.0`, `v1.0.0`)
+- Beta: `v0.2.0b1`
+- Use `1.0.0` when stable with API guarantees
 
 ## Post-publish Verification
 
