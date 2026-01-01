@@ -4,7 +4,7 @@ Extract the essence of your logs for LLM analysis.
 
 Analyzes log files using template extraction (Drain3) and semantic clustering (FastEmbed) to produce token-efficient summaries for LLM consumption. Includes automatic secret/PII redaction for safe external analysis.
 
-![Demo Video](demos/output/full-demo.mp4)
+https://github.com/user-attachments/assets/97d66d89-1745-4d0f-ac10-38744f98b636
 
 <p align="center">
   <em>Raw logs → Token-efficient summary with automatic secret redaction</em>
