@@ -7,7 +7,7 @@ on:
 
 jobs:
   sonarqube:
-    uses: Apsion/.github/.github/workflows/org-sonarqube.yml@main
+    uses: Apsion/apsion-github-org-workflows/.github/workflows/org-sonarqube.yml@main
     with:
       project_type: python
       python_version: '3.12'
