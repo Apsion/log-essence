@@ -37,12 +37,42 @@ jobs:
         continue-on-error: true
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
+        id: sonar-scan
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Wait before retry
+        if: steps.sonar-scan.outcome == 'failure'
+        run: sleep 30
+
+      - name: SonarQube Scan (Retry)
+        if: steps.sonar-scan.outcome == 'failure'
+        uses: SonarSource/sonarqube-scan-action@v6
+        id: sonar-scan-retry
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Wait before final retry
+        if: steps.sonar-scan.outcome == 'failure' && steps.sonar-scan-retry.outcome == 'failure'
+        run: sleep 60
+
+      - name: SonarQube Scan (Final Retry)
+        if: steps.sonar-scan.outcome == 'failure' && steps.sonar-scan-retry.outcome == 'failure'
+        uses: SonarSource/sonarqube-scan-action@v6
+        timeout-minutes: 15
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: SonarQube Quality Gate
+        if: steps.sonar-scan.outcome == 'success' || steps.sonar-scan-retry.outcome == 'success'
         uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
         continue-on-error: true
         timeout-minutes: 5
