@@ -3,20 +3,19 @@
 Provides standalone log analysis without running as an MCP server.
 
 Usage:
-    log-essence /path/to/logs              # Analyze logs
-    log-essence /var/log/*.log             # Glob patterns supported
-    log-essence --serve                    # Run as MCP server
-    log-essence /path/to/logs --strict     # Strict redaction mode
-    log-essence /path/to/logs -o json      # JSON output format
-    log-essence /path/to/logs --profile docker  # Use named profile
-    log-essence demo generate script.yaml  # Generate demo video
+    log-essence /path/to/logs              # Analyze logs (default subcommand)
+    log-essence analyze /path/to/logs      # Explicit analyze
+    log-essence serve                      # Run as MCP server
+    log-essence stats                      # Show cumulative analytics
+    log-essence init                       # Auto-configure AI tools
+    log-essence discover                   # Find log sources
     log-essence ui                         # Launch paste-and-copy web UI
+    log-essence demo generate script.yaml  # Generate demo video
 """
 
 from __future__ import annotations
 
 import argparse
-import os
 import signal
 import sys
 import time
@@ -44,31 +43,12 @@ DEFAULT_REDACTION = "moderate"
 DEFAULT_OUTPUT = "markdown"
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Create the argument parser."""
-    parser = argparse.ArgumentParser(
-        prog="log-essence",
-        description="Log consolidator for LLM analysis. "
-        "Analyzes logs using template extraction and semantic clustering.",
-        epilog="Examples:\n"
-        "  log-essence /var/log/app.log\n"
-        "  log-essence /var/log/*.log --severity ERROR WARNING\n"
-        "  log-essence /var/log/app.log --since 1h --redact strict\n"
-        "  log-essence /var/log/app.log --profile docker\n"
-        "  log-essence --serve  # Run as MCP server",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
+def _add_analysis_args(parser: argparse.ArgumentParser) -> None:
+    """Add common analysis arguments to a parser or subparser."""
     parser.add_argument(
         "path",
         nargs="?",
         help="Path to log file, directory, or glob pattern",
-    )
-
-    parser.add_argument(
-        "--serve",
-        action="store_true",
-        help="Run as MCP server instead of CLI mode",
     )
 
     # Config file options
@@ -85,7 +65,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="Use named configuration profile",
     )
 
-    # Analysis options (defaults applied from config)
+    # Analysis options
     parser.add_argument(
         "--token-budget",
         type=int,
@@ -132,6 +112,20 @@ def create_parser() -> argparse.ArgumentParser:
         help=f"Output format (default: {DEFAULT_OUTPUT})",
     )
 
+    parser.add_argument(
+        "-c",
+        "--compact",
+        action="store_true",
+        help="Compact output mode (reduced tokens for AI agent consumption)",
+    )
+
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Suppress stats footer on stderr",
+    )
+
     # Watch mode options
     parser.add_argument(
         "-w",
@@ -148,20 +142,136 @@ def create_parser() -> argparse.ArgumentParser:
         help="Update interval in seconds for watch mode (default: 3.0)",
     )
 
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the argument parser with subcommands."""
+    parser = argparse.ArgumentParser(
+        prog="log-essence",
+        description="Log consolidator for LLM analysis. "
+        "Analyzes logs using template extraction and semantic clustering.",
+        epilog="Examples:\n"
+        "  log-essence /var/log/app.log\n"
+        "  log-essence /var/log/*.log --severity ERROR WARNING\n"
+        "  log-essence serve\n"
+        "  log-essence stats\n"
+        "  log-essence init --tool claude-desktop\n"
+        "  log-essence discover",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
     parser.add_argument(
         "--version",
         action="version",
         version=f"%(prog)s {__version__}",
     )
 
+    subparsers = parser.add_subparsers(dest="command")
+
+    # --- analyze (default when path given) ---
+    analyze_parser = subparsers.add_parser(
+        "analyze",
+        help="Analyze log files (default command)",
+    )
+    _add_analysis_args(analyze_parser)
+
+    # --- serve ---
+    subparsers.add_parser(
+        "serve",
+        help="Run as MCP server",
+    )
+
+    # --- stats ---
+    stats_parser = subparsers.add_parser(
+        "stats",
+        help="Show cumulative analytics dashboard",
+    )
+    stats_parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="stats_json",
+        help="Output stats as JSON",
+    )
+    stats_parser.add_argument(
+        "--since",
+        metavar="TIME",
+        help="Only show stats since TIME (e.g., 7d, 1h)",
+    )
+    stats_parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Clear all analytics data",
+    )
+
+    # --- init ---
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Auto-configure log-essence for AI coding tools",
+    )
+    init_parser.add_argument(
+        "--tool",
+        choices=["claude-desktop", "claude-code"],
+        help="Target a specific AI tool (default: auto-detect)",
+    )
+    init_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without writing",
+    )
+    init_parser.add_argument(
+        "--uninstall",
+        action="store_true",
+        help="Remove log-essence configuration",
+    )
+
+    # --- discover ---
+    subparsers.add_parser(
+        "discover",
+        help="Scan for analyzable log sources",
+    )
+
+    # --- ui ---
+    ui_parser = subparsers.add_parser(
+        "ui",
+        help="Launch the Streamlit web UI",
+    )
+    ui_parser.add_argument(
+        "--port",
+        type=int,
+        default=8501,
+        help="Port for the web UI (default: 8501)",
+    )
+    ui_parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't open browser automatically",
+    )
+
+    # --- demo ---
+    subparsers.add_parser(
+        "demo",
+        help="Generate demo video",
+        add_help=False,  # Demo has its own arg handling
+    )
+
+    # --- Backward compat: --serve flag (hidden, use 'serve' subcommand) ---
+    parser.add_argument(
+        "--serve",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
+
     return parser
+
+
+# Known subcommands for backward-compat detection
+_KNOWN_COMMANDS = {"analyze", "serve", "stats", "init", "discover", "ui", "demo"}
 
 
 def run_analysis(args: argparse.Namespace) -> int:
     """Run log analysis and print results."""
     if not args.path:
         print("Error: path is required for analysis mode", file=sys.stderr)
-        print("Use --serve to run as MCP server, or provide a path", file=sys.stderr)
+        print("Use 'log-essence serve' to run as MCP server, or provide a path", file=sys.stderr)
         return 1
 
     # Load config and merge with CLI args
@@ -244,6 +354,9 @@ def run_analysis(args: argparse.Namespace) -> int:
     else:
         redact = redaction_mode
 
+    # Check compact mode
+    compact = getattr(args, "compact", False)
+
     # Watch mode
     if args.watch:
         if len(log_files) != 1:
@@ -265,6 +378,7 @@ def run_analysis(args: argparse.Namespace) -> int:
         num_clusters=num_clusters,
         severity_filter=severity_filter,
         redact=redact,
+        compact=compact,
     )
 
     # Output in requested format
@@ -284,6 +398,33 @@ def run_analysis(args: argparse.Namespace) -> int:
     else:
         print(result.markdown)
 
+    # Print stats footer to stderr (unless quiet)
+    quiet = getattr(args, "quiet", False)
+    if not quiet:
+        from log_essence.analytics import format_stats_footer
+
+        footer = format_stats_footer(
+            lines_in=result.lines_processed,
+            tokens_out=result.stats.output_tokens,
+            tokens_in=result.stats.original_tokens,
+            redactions=result.stats.redaction_count,
+            duration_ms=result.stats.processing_time_ms,
+        )
+        print(footer, file=sys.stderr)
+
+    # Record analytics
+    from log_essence.analytics import record_analysis
+
+    record_analysis(
+        source=args.path,
+        lines_in=result.lines_processed,
+        tokens_in=result.stats.original_tokens,
+        tokens_out=result.stats.output_tokens,
+        redactions=result.stats.redaction_count,
+        duration_ms=result.stats.processing_time_ms,
+        log_format=result.log_format,
+    )
+
     return 0
 
 
@@ -294,8 +435,9 @@ def _signal_handler(signum: int, frame: object) -> None:
 
 
 def _clear_screen() -> None:
-    """Clear terminal screen."""
-    os.system("cls" if os.name == "nt" else "clear")
+    """Clear terminal screen using ANSI escape sequence."""
+    sys.stdout.write("\033[2J\033[H")
+    sys.stdout.flush()
 
 
 def run_watch_mode(
@@ -403,9 +545,27 @@ def run_watch_mode(
     return 0
 
 
+def _preprocess_args(argv: list[str]) -> list[str]:
+    """Insert 'analyze' subcommand for backward compat when first arg is a path.
+
+    Allows `log-essence /path/to/logs` to work the same as `log-essence analyze /path/to/logs`.
+    """
+    if not argv:
+        return argv
+
+    first = argv[0]
+
+    # If first arg is a known subcommand or starts with -, don't modify
+    if first in _KNOWN_COMMANDS or first.startswith("-"):
+        return argv
+
+    # First arg looks like a path — insert 'analyze' before it
+    return ["analyze", *argv]
+
+
 def main() -> int:
     """Main entry point for CLI."""
-    # Check for demo subcommand first
+    # Check for demo subcommand first (it has its own arg handling)
     if len(sys.argv) > 1 and sys.argv[1] == "demo":
         try:
             from log_essence.demo.cli import main as demo_main
@@ -420,26 +580,46 @@ def main() -> int:
             print(f"Details: {e}", file=sys.stderr)
             return 1
 
-    # Check for ui subcommand
-    if len(sys.argv) > 1 and sys.argv[1] == "ui":
+    parser = create_parser()
+    processed = _preprocess_args(sys.argv[1:])
+    args = parser.parse_args(processed)
+
+    # Route to subcommand
+    if args.command == "serve" or getattr(args, "serve", False):
+        from log_essence.server import mcp
+
+        mcp.run()
+        return 0
+
+    if args.command == "stats":
+        from log_essence.analytics import run_stats_command
+
+        return run_stats_command(
+            as_json=args.stats_json,
+            since=args.since,
+            reset=args.reset,
+        )
+
+    if args.command == "init":
+        from log_essence.init import run_init_command
+
+        return run_init_command(
+            tool=args.tool,
+            dry_run=args.dry_run,
+            uninstall=args.uninstall,
+        )
+
+    if args.command == "discover":
+        from log_essence.discover import run_discover_command
+
+        return run_discover_command()
+
+    if args.command == "ui":
         try:
             from log_essence.ui import launch_ui
 
-            # Parse optional flags
-            open_browser = "--no-browser" not in sys.argv
-            port = 8501
-            args_list = sys.argv[2:]  # Skip 'log-essence' and 'ui'
-            i = 0
-            while i < len(args_list):
-                arg = args_list[i]
-                if arg.startswith("--port="):
-                    port = int(arg.split("=")[1])
-                elif arg == "--port" and i + 1 < len(args_list):
-                    port = int(args_list[i + 1])
-                    i += 1  # Skip the value
-                i += 1
-
-            launch_ui(open_browser=open_browser, port=port)
+            open_browser = not args.no_browser
+            launch_ui(open_browser=open_browser, port=args.port)
             return 0
         except ImportError as e:
             print(
@@ -449,17 +629,13 @@ def main() -> int:
             print(f"Details: {e}", file=sys.stderr)
             return 1
 
-    parser = create_parser()
-    args = parser.parse_args()
+    # Default: analyze (explicit subcommand or bare path)
+    if args.command == "analyze":
+        return run_analysis(args)
 
-    if args.serve:
-        # Run as MCP server
-        from log_essence.server import mcp
-
-        mcp.run()
-        return 0
-
-    return run_analysis(args)
+    # No subcommand — show help (--serve handled above)
+    parser.print_help()
+    return 0
 
 
 if __name__ == "__main__":

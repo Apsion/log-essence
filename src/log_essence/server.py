@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import glob as glob_module
+import hashlib
 import json
 import re
 import subprocess
+import threading
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import tiktoken
@@ -682,8 +685,20 @@ def format_as_markdown(
     log_format: str,
     total_lines: int,
     token_budget: int,
+    compact: bool = False,
 ) -> str:
-    """Format clusters as markdown, respecting token budget."""
+    """Format clusters as markdown, respecting token budget.
+
+    Args:
+        clusters: Semantic clusters to format.
+        log_format: Detected log format name.
+        total_lines: Total number of input lines.
+        token_budget: Maximum tokens in output.
+        compact: If True, use abbreviated format for AI agent consumption.
+    """
+    if compact:
+        return _format_compact(clusters, log_format, total_lines, token_budget)
+
     sections: list[str] = []
 
     # Header
@@ -752,12 +767,69 @@ def format_as_markdown(
     return "".join(sections)
 
 
+def _format_compact(
+    clusters: list[SemanticCluster],
+    log_format: str,
+    total_lines: int,
+    token_budget: int,
+) -> str:
+    """Format clusters in compact mode for AI agent consumption.
+
+    Removes markdown decorations, uses abbreviated labels, and reduces whitespace.
+    """
+    parts: list[str] = []
+    patterns = sum(len(c.templates) for c in clusters)
+    parts.append(
+        f"fmt={log_format} lines={total_lines:,} patterns={patterns} clusters={len(clusters)}"
+    )
+
+    # Severity counts on one line
+    severity_counts: dict[str, int] = defaultdict(int)
+    for cluster in clusters:
+        for template in cluster.templates:
+            if template.severity:
+                severity_counts[template.severity] += template.count
+    if severity_counts:
+        sev_parts = [f"{k}:{v}" for k, v in severity_counts.items()]
+        parts.append("sev: " + " ".join(sev_parts))
+
+    parts.append("")
+    current_tokens = count_tokens("\n".join(parts))
+
+    for i, cluster in enumerate(clusters, 1):
+        summary_text = cluster.summary[:60]
+        cluster_lines = [f"[{i}] {summary_text} (n={cluster.total_count:,})"]
+
+        top_templates = sorted(cluster.templates, key=lambda t: t.count, reverse=True)[:3]
+        for template in top_templates:
+            sev = f"{template.severity} " if template.severity else ""
+            cluster_lines.append(f"  {sev}{template.template} ({template.count}x)")
+
+        # Only first example, truncated
+        if cluster.templates[0].examples:
+            example_text = cluster.templates[0].examples[0][:200]
+            cluster_lines.append(f"  ex: {example_text}")
+
+        section = "\n".join(cluster_lines) + "\n"
+        section_tokens = count_tokens(section)
+        if current_tokens + section_tokens > token_budget:
+            remaining = len(clusters) - i + 1
+            parts.append(f"...{remaining} more clusters omitted")
+            break
+
+        parts.append(section)
+        current_tokens += section_tokens
+
+    return "\n".join(parts)
+
+
 def analyze_log_lines(
     all_lines: list[str],
     token_budget: int = 8000,
     num_clusters: int = 10,
     severity_filter: list[str] | None = None,
     redact: bool | str = True,
+    compact: bool = False,
 ) -> AnalysisResult:
     """Core analysis function for log lines.
 
@@ -767,6 +839,7 @@ def analyze_log_lines(
         num_clusters: Number of semantic clusters
         severity_filter: Only include these severity levels
         redact: Redaction mode - True/"moderate" (default), "strict", "minimal", or False
+        compact: If True, use abbreviated format for AI agent consumption
 
     Returns:
         AnalysisResult with markdown output and statistics
@@ -830,7 +903,9 @@ def analyze_log_lines(
     clusters = cluster_templates_semantically(templates, num_clusters)
 
     # Format output
-    markdown = format_as_markdown(clusters, log_format, len(all_lines), token_budget)
+    markdown = format_as_markdown(
+        clusters, log_format, len(all_lines), token_budget, compact=compact
+    )
 
     elapsed_ms = (time.perf_counter() - start_time) * 1000
     output_tokens = count_tokens(markdown)
@@ -955,7 +1030,11 @@ def get_logs(
         all_lines = filter_by_time(all_lines, since_dt, log_format)
 
     result = analyze_log_lines(all_lines, token_budget, num_clusters, severity_filter, redact)
-    return result.markdown
+
+    # Store in tee cache for later retrieval via get_raw_logs
+    analysis_id = tee_store(all_lines, path)
+
+    return result.markdown + f"\n\n_analysis_id: {analysis_id}_"
 
 
 def discover_compose_file(path: str | None = None) -> Path | None:
@@ -1666,6 +1745,89 @@ def search_logs(
         sections.append("\n---\n")
 
     return "".join(sections)
+
+
+# --- Tee-style output preservation ---
+# Cache raw (redacted) log content so the AI agent can request full context
+# after seeing the summary. Auto-cleanup after TTL.
+
+_tee_cache: dict[str, dict[str, Any]] = {}
+_tee_lock = threading.Lock()
+_TEE_TTL_SECONDS = 3600  # 1 hour
+
+
+def _tee_cleanup() -> None:
+    """Remove expired entries from the tee cache."""
+    now = datetime.now(UTC)
+    with _tee_lock:
+        expired = [
+            k
+            for k, v in _tee_cache.items()
+            if (now - v["timestamp"]).total_seconds() > _TEE_TTL_SECONDS
+        ]
+        for k in expired:
+            del _tee_cache[k]
+
+
+def tee_store(lines: list[str], source: str) -> str:
+    """Store raw log lines in the tee cache.
+
+    Args:
+        lines: Redacted log lines to cache.
+        source: Source identifier for the logs.
+
+    Returns:
+        Analysis ID that can be used to retrieve the lines.
+    """
+    _tee_cleanup()
+    analysis_id = hashlib.sha256(
+        f"{source}:{datetime.now(UTC).isoformat()}:{len(lines)}".encode()
+    ).hexdigest()[:12]
+
+    with _tee_lock:
+        _tee_cache[analysis_id] = {
+            "lines": lines,
+            "source": source,
+            "line_count": len(lines),
+            "timestamp": datetime.now(UTC),
+        }
+
+    return analysis_id
+
+
+@mcp.tool()
+def get_raw_logs(
+    analysis_id: str,
+    start_line: int = 0,
+    max_lines: int = 500,
+) -> str:
+    """Retrieve raw (redacted) log lines from a previous analysis.
+
+    After reviewing a log analysis summary, use this tool to get the full
+    log content for deeper investigation. Lines are already redacted.
+
+    Args:
+        analysis_id: The analysis ID returned from a previous get_logs call.
+        start_line: Line offset to start from (default: 0).
+        max_lines: Maximum lines to return (default: 500).
+
+    Returns:
+        Raw log lines from the cached analysis.
+    """
+    with _tee_lock:
+        entry = _tee_cache.get(analysis_id)
+
+    if entry is None:
+        return (
+            f"Error: Analysis '{analysis_id}' not found or expired. "
+            "Re-run the analysis to generate a new cache."
+        )
+
+    lines = entry["lines"][start_line : start_line + max_lines]
+    total = entry["line_count"]
+    end = start_line + len(lines)
+    header = f"Source: {entry['source']} | Lines {start_line + 1}-{end} of {total}\n\n"
+    return header + "\n".join(lines)
 
 
 def main() -> None:

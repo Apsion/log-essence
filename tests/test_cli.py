@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from log_essence import __version__
-from log_essence.cli import create_parser, run_analysis
+from log_essence.cli import _preprocess_args, create_parser, run_analysis
 from log_essence.config import (
     Config,
     ConfigDefaults,
@@ -13,18 +13,46 @@ from log_essence.config import (
     merge_config_with_args,
 )
 
+# --- Backward compatibility preprocessing ---
+
+
+def test_preprocess_args_with_path() -> None:
+    """A bare path gets 'analyze' prepended."""
+    result = _preprocess_args(["/path/to/logs"])
+    assert result == ["analyze", "/path/to/logs"]
+
+
+def test_preprocess_args_with_subcommand() -> None:
+    """Known subcommands are not modified."""
+    assert _preprocess_args(["serve"]) == ["serve"]
+    assert _preprocess_args(["stats"]) == ["stats"]
+    assert _preprocess_args(["init"]) == ["init"]
+
+
+def test_preprocess_args_with_flags() -> None:
+    """Flags (starting with -) are not modified."""
+    assert _preprocess_args(["--serve"]) == ["--serve"]
+    assert _preprocess_args(["--version"]) == ["--version"]
+
+
+def test_preprocess_args_empty() -> None:
+    assert _preprocess_args([]) == []
+
+
+# --- Parser tests ---
+
 
 def test_parser_defaults() -> None:
     """CLI args default to None - config provides actual defaults."""
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs"])
+    args = parser.parse_args(["analyze", "/path/to/logs"])
     assert args.path == "/path/to/logs"
+    assert args.command == "analyze"
     # CLI args default to None; config module provides defaults
     assert args.token_budget is None
     assert args.clusters is None
     assert args.redact is None
     assert args.output is None
-    assert args.serve is False
     assert args.config is None
     assert args.profile is None
 
@@ -33,6 +61,7 @@ def test_parser_all_options() -> None:
     parser = create_parser()
     args = parser.parse_args(
         [
+            "analyze",
             "/var/log/app.log",
             "--token-budget",
             "4000",
@@ -57,34 +86,40 @@ def test_parser_all_options() -> None:
 
 def test_parser_serve_mode() -> None:
     parser = create_parser()
+    args = parser.parse_args(["serve"])
+    assert args.command == "serve"
+
+
+def test_parser_serve_mode_flag_compat() -> None:
+    """Legacy --serve flag still works."""
+    parser = create_parser()
     args = parser.parse_args(["--serve"])
     assert args.serve is True
-    assert args.path is None
 
 
 def test_parser_no_redact() -> None:
     parser = create_parser()
-    args = parser.parse_args(["/path", "--no-redact"])
+    args = parser.parse_args(["analyze", "/path", "--no-redact"])
     assert args.no_redact is True
 
 
 def test_run_analysis_missing_path() -> None:
     parser = create_parser()
-    args = parser.parse_args([])
+    args = parser.parse_args(["analyze"])
     result = run_analysis(args)
     assert result == 1  # Error exit code
 
 
 def test_run_analysis_nonexistent_path() -> None:
     parser = create_parser()
-    args = parser.parse_args(["/nonexistent/path/to/logs"])
+    args = parser.parse_args(["analyze", "/nonexistent/path/to/logs"])
     result = run_analysis(args)
     assert result == 1  # Error exit code
 
 
 def test_run_analysis_invalid_since() -> None:
     parser = create_parser()
-    args = parser.parse_args(["/some/path", "--since", "invalid"])
+    args = parser.parse_args(["analyze", "/some/path", "--since", "invalid"])
     result = run_analysis(args)
     assert result == 1  # Error exit code
 
@@ -99,7 +134,7 @@ def test_run_analysis_success(tmp_path: Path) -> None:
     )
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file)])
+    args = parser.parse_args(["analyze", str(log_file)])
     result = run_analysis(args)
     assert result == 0  # Success
 
@@ -114,7 +149,7 @@ def test_run_analysis_with_severity_filter(tmp_path: Path) -> None:
     )
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file), "--severity", "ERROR"])
+    args = parser.parse_args(["analyze", str(log_file), "--severity", "ERROR"])
     result = run_analysis(args)
     assert result == 0
 
@@ -124,7 +159,7 @@ def test_run_analysis_with_redaction(tmp_path: Path, capsys) -> None:
     log_file.write_text("2025-01-01T10:00:00Z INFO user@example.com logged in\n")
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file)])
+    args = parser.parse_args(["analyze", str(log_file)])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
@@ -138,7 +173,7 @@ def test_run_analysis_no_redact(tmp_path: Path, capsys) -> None:
     log_file.write_text("2025-01-01T10:00:00Z INFO user@example.com logged in\n")
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file), "--no-redact"])
+    args = parser.parse_args(["analyze", str(log_file), "--no-redact"])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
@@ -149,20 +184,20 @@ def test_run_analysis_no_redact(tmp_path: Path, capsys) -> None:
 def test_parser_output_format_default() -> None:
     """CLI output arg defaults to None - config provides 'markdown' default."""
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs"])
+    args = parser.parse_args(["analyze", "/path/to/logs"])
     # CLI args default to None; config module provides "markdown" default
     assert args.output is None
 
 
 def test_parser_output_format_json() -> None:
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs", "-o", "json"])
+    args = parser.parse_args(["analyze", "/path/to/logs", "-o", "json"])
     assert args.output == "json"
 
 
 def test_parser_output_format_long_flag() -> None:
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs", "--output", "json"])
+    args = parser.parse_args(["analyze", "/path/to/logs", "--output", "json"])
     assert args.output == "json"
 
 
@@ -176,7 +211,7 @@ def test_run_analysis_json_output(tmp_path: Path, capsys) -> None:
     )
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file), "-o", "json"])
+    args = parser.parse_args(["analyze", str(log_file), "-o", "json"])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
@@ -218,7 +253,7 @@ def test_run_analysis_json_output_with_redaction(tmp_path: Path, capsys) -> None
     log_file.write_text("2025-01-01T10:00:00Z INFO user@example.com logged in\n")
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file), "-o", "json"])
+    args = parser.parse_args(["analyze", str(log_file), "-o", "json"])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
@@ -231,6 +266,77 @@ def test_run_analysis_json_output_with_redaction(tmp_path: Path, capsys) -> None
     output_str = json.dumps(output)
     assert "user@example.com" not in output_str
     assert "[EMAIL:" in output_str
+
+
+# --- Stats footer test ---
+
+
+def test_run_analysis_prints_stats_footer(tmp_path: Path, capsys) -> None:
+    log_file = tmp_path / "test.log"
+    log_file.write_text("2025-01-01T10:00:00Z INFO Server started\n")
+
+    parser = create_parser()
+    args = parser.parse_args(["analyze", str(log_file)])
+    run_analysis(args)
+
+    captured = capsys.readouterr()
+    assert "log-essence:" in captured.err
+    assert "reduction" in captured.err
+
+
+def test_run_analysis_quiet_suppresses_footer(tmp_path: Path, capsys) -> None:
+    log_file = tmp_path / "test.log"
+    log_file.write_text("2025-01-01T10:00:00Z INFO Server started\n")
+
+    parser = create_parser()
+    args = parser.parse_args(["analyze", str(log_file), "-q"])
+    run_analysis(args)
+
+    captured = capsys.readouterr()
+    assert "log-essence:" not in captured.err
+
+
+# --- Compact mode test ---
+
+
+def test_parser_compact_flag() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["analyze", "/path", "-c"])
+    assert args.compact is True
+
+
+# --- New subcommand parsing ---
+
+
+def test_parser_stats_subcommand() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["stats"])
+    assert args.command == "stats"
+
+
+def test_parser_stats_json_flag() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["stats", "--json"])
+    assert args.stats_json is True
+
+
+def test_parser_init_subcommand() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["init", "--tool", "claude-desktop"])
+    assert args.command == "init"
+    assert args.tool == "claude-desktop"
+
+
+def test_parser_init_dry_run() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["init", "--dry-run"])
+    assert args.dry_run is True
+
+
+def test_parser_discover_subcommand() -> None:
+    parser = create_parser()
+    args = parser.parse_args(["discover"])
+    assert args.command == "discover"
 
 
 # Config tests
@@ -339,6 +445,28 @@ def test_merge_config_cli_overrides_profile() -> None:
     assert merged["clusters"] == 5  # CLI wins over profile
 
 
+def test_merge_config_env_var_overrides(monkeypatch) -> None:
+    """Environment variables override config but not CLI args."""
+    monkeypatch.setenv("LOG_ESSENCE_TOKEN_BUDGET", "4000")
+    monkeypatch.setenv("LOG_ESSENCE_REDACTION", "strict")
+
+    config = Config()
+    merged = merge_config_with_args(config)
+
+    assert merged["token_budget"] == 4000
+    assert merged["redaction"] == "strict"
+
+
+def test_merge_config_cli_overrides_env_var(monkeypatch) -> None:
+    """CLI args take priority over environment variables."""
+    monkeypatch.setenv("LOG_ESSENCE_TOKEN_BUDGET", "4000")
+
+    config = Config()
+    merged = merge_config_with_args(config, token_budget=2000)
+
+    assert merged["token_budget"] == 2000  # CLI wins
+
+
 def test_run_analysis_with_config_file(tmp_path: Path, capsys) -> None:
     """Config file values are used when no CLI args provided."""
     # Create config file
@@ -355,7 +483,7 @@ defaults:
     log_file.write_text("2025-01-01T10:00:00Z INFO Server started\n")
 
     parser = create_parser()
-    args = parser.parse_args([str(log_file), "--config", str(config_file)])
+    args = parser.parse_args(["analyze", str(log_file), "--config", str(config_file)])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
@@ -386,6 +514,7 @@ profiles:
     parser = create_parser()
     args = parser.parse_args(
         [
+            "analyze",
             str(log_file),
             "--config",
             str(config_file),
@@ -409,7 +538,7 @@ profiles:
 def test_parser_watch_mode() -> None:
     """Watch mode flags are parsed correctly."""
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs", "-w"])
+    args = parser.parse_args(["analyze", "/path/to/logs", "-w"])
     assert args.watch is True
     assert args.interval == 3.0  # Default interval
 
@@ -417,7 +546,7 @@ def test_parser_watch_mode() -> None:
 def test_parser_watch_mode_with_interval() -> None:
     """Custom interval is parsed correctly."""
     parser = create_parser()
-    args = parser.parse_args(["/path/to/logs", "--watch", "--interval", "5.0"])
+    args = parser.parse_args(["analyze", "/path/to/logs", "--watch", "--interval", "5.0"])
     assert args.watch is True
     assert args.interval == 5.0
 
@@ -429,7 +558,7 @@ def test_watch_mode_requires_single_file(tmp_path: Path, capsys) -> None:
     (tmp_path / "app2.log").write_text("2025-01-01T10:00:00Z INFO Log 2\n")
 
     parser = create_parser()
-    args = parser.parse_args([str(tmp_path), "--watch"])
+    args = parser.parse_args(["analyze", str(tmp_path), "--watch"])
     result = run_analysis(args)
 
     captured = capsys.readouterr()
