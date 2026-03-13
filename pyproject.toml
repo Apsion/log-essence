@@ -91,6 +91,11 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+[tool.uv]
+override-dependencies = [
+    "cachetools>=5.0.0",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
