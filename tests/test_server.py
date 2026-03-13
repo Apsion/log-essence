@@ -74,7 +74,7 @@ def test_extract_templates() -> None:
 
 
 def test_get_logs_file_not_found() -> None:
-    result = get_logs.fn(path="/nonexistent/path.log")
+    result = get_logs(path="/nonexistent/path.log")
     assert "Error: Path does not exist" in result
 
 
@@ -89,7 +89,7 @@ def test_get_logs_with_sample(tmp_path: Path) -> None:
 """
     )
 
-    result = get_logs.fn(path=str(log_file), token_budget=2000, num_clusters=3)
+    result = get_logs(path=str(log_file), token_budget=2000, num_clusters=3)
     assert "# Log Analysis Summary" in result
     assert "Total lines:" in result
     assert "ERROR" in result or "WARNING" in result
@@ -107,7 +107,7 @@ def test_get_logs_severity_filter(tmp_path: Path) -> None:
 """
     )
 
-    result = get_logs.fn(
+    result = get_logs(
         path=str(log_file),
         token_budget=2000,
         num_clusters=3,
@@ -202,12 +202,12 @@ def test_get_logs_with_since(tmp_path: Path) -> None:
     )
 
     # Test with since filter that should exclude very old message
-    result = get_logs.fn(path=str(log_file), token_budget=2000, since="2025-12-01")
+    result = get_logs(path=str(log_file), token_budget=2000, since="2025-12-01")
     assert "# Log Analysis Summary" in result
 
 
 def test_get_logs_invalid_since() -> None:
-    result = get_logs.fn(path="/some/path", since="invalid-time-format")
+    result = get_logs(path="/some/path", since="invalid-time-format")
     assert "Error: Invalid time format" in result
 
 
@@ -221,7 +221,7 @@ def test_get_logs_with_glob_pattern(tmp_path: Path) -> None:
     (tmp_path / "other.txt").write_text("Some other content\n")
 
     # Test glob pattern
-    result = get_logs.fn(path=str(tmp_path / "*.log"), token_budget=2000)
+    result = get_logs(path=str(tmp_path / "*.log"), token_budget=2000)
     assert "# Log Analysis Summary" in result
 
 
@@ -231,14 +231,14 @@ def test_get_logs_with_glob_pattern(tmp_path: Path) -> None:
 def test_get_container_logs_docker_not_available() -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.side_effect = FileNotFoundError()
-        result = get_container_logs.fn(container="test-container")
+        result = get_container_logs(container="test-container")
         assert "Docker not found" in result
 
 
 def test_list_containers_docker_not_available() -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.side_effect = FileNotFoundError()
-        result = list_containers.fn()
+        result = list_containers()
         assert "Docker not found" in result
 
 
@@ -248,7 +248,7 @@ def test_list_containers_docker_not_available() -> None:
 def test_get_journald_logs_not_available() -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.side_effect = FileNotFoundError()
-        result = get_journald_logs.fn(unit="nginx")
+        result = get_journald_logs(unit="nginx")
         assert "journalctl not found" in result
 
 
@@ -258,7 +258,7 @@ def test_get_journald_logs_not_available() -> None:
 )
 def test_get_journald_logs_integration() -> None:
     # Only runs on systems with journald
-    result = get_journald_logs.fn(lines_limit=10, token_budget=2000)
+    result = get_journald_logs(lines_limit=10, token_budget=2000)
     # Should return either logs or an empty message, not an error
     assert "Error:" not in result or "No logs found" in result
 
@@ -375,7 +375,7 @@ def test_get_error_chain_tool(tmp_path: Path) -> None:
 """
     )
 
-    result = get_error_chain.fn(path=str(log_file), time_window=30)
+    result = get_error_chain(path=str(log_file), time_window=30)
     assert "Error Chain Analysis" in result
     assert "Root Cause" in result
 
@@ -389,7 +389,7 @@ def test_get_error_chain_with_pattern(tmp_path: Path) -> None:
 """
     )
 
-    result = get_error_chain.fn(path=str(log_file), error_pattern="database")
+    result = get_error_chain(path=str(log_file), error_pattern="database")
     assert "Error Chain Analysis" in result
     # Should only find database-related errors
     assert "Database" in result
@@ -403,7 +403,7 @@ def test_get_error_chain_no_errors(tmp_path: Path) -> None:
 """
     )
 
-    result = get_error_chain.fn(path=str(log_file))
+    result = get_error_chain(path=str(log_file))
     assert "No errors found" in result
 
 
@@ -421,7 +421,7 @@ def test_search_logs_tool(tmp_path: Path) -> None:
 """
     )
 
-    result = search_logs.fn(path=str(log_file), query="database timeout error", top_k=3)
+    result = search_logs(path=str(log_file), query="database timeout error", top_k=3)
     assert "Search Results" in result
     assert "similarity:" in result
 
@@ -435,7 +435,7 @@ def test_search_logs_with_severity_filter(tmp_path: Path) -> None:
 """
     )
 
-    result = search_logs.fn(path=str(log_file), query="connection", severity_filter=["ERROR"])
+    result = search_logs(path=str(log_file), query="connection", severity_filter=["ERROR"])
     assert "Search Results" in result
 
 
@@ -443,5 +443,5 @@ def test_search_logs_no_matches(tmp_path: Path) -> None:
     log_file = tmp_path / "empty.log"
     log_file.write_text("")
 
-    result = search_logs.fn(path=str(log_file), query="anything")
+    result = search_logs(path=str(log_file), query="anything")
     assert "No log content found" in result or "No matching" in result

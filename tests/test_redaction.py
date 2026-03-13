@@ -408,7 +408,7 @@ class TestIntegration:
 """
         )
 
-        result = get_logs.fn(path=str(log_file), redact=True)
+        result = get_logs(path=str(log_file), redact=True)
         assert "user@acme.com" not in result
         assert "192.168.1.50" not in result
         assert "4111111111111111" not in result
@@ -420,7 +420,7 @@ class TestIntegration:
         log_file = tmp_path / "sensitive.log"
         log_file.write_text("2025-01-01T10:00:00Z INFO user@acme.com\n")
 
-        result = get_logs.fn(path=str(log_file), redact=False)
+        result = get_logs(path=str(log_file), redact=False)
         # Original email should be present
         assert "user@acme.com" in result
 
@@ -428,7 +428,7 @@ class TestIntegration:
         log_file = tmp_path / "secrets.log"
         log_file.write_text("2025-01-01T10:00:00Z token=xK9mN2pL5qR8sT1vW4yZ\n")
 
-        result = get_logs.fn(path=str(log_file), redact="strict")
+        result = get_logs(path=str(log_file), redact="strict")
         assert "xK9mN2pL5qR8sT1vW4yZ" not in result
 
     def test_get_logs_minimal_mode(self, tmp_path: Path) -> None:
@@ -436,5 +436,5 @@ class TestIntegration:
         # Bearer tokens need 10+ characters to be detected
         log_file.write_text("2025-01-01T10:00:00Z Authorization: Bearer secret12345678\n")
 
-        result = get_logs.fn(path=str(log_file), redact="minimal")
+        result = get_logs(path=str(log_file), redact="minimal")
         assert "[BEARER:" in result
