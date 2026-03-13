@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
-class ActionType(str, Enum):
+class ActionType(StrEnum):
     """Types of actions that can be performed in a demo."""
 
     NAVIGATE = "navigate"
