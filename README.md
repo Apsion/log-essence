@@ -360,7 +360,7 @@ Error processing payment for [EMAIL:a7f2] card [CC:16:d4e8]
 
 ```bash
 # Clone and install
-git clone https://github.com/petebytes/log-essence
+git clone https://github.com/Apsion/log-essence
 cd log-essence
 uv sync --all-groups
 

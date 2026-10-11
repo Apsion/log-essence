@@ -1,6 +1,6 @@
 #!/bin/sh
 # log-essence installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/petebytes/log-essence/main/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/Apsion/log-essence/main/install.sh | sh
 set -e
 
 PACKAGE="log-essence"

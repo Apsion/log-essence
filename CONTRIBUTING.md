@@ -6,7 +6,7 @@ Thanks for your interest in contributing! This document covers the development w
 
 ```bash
 # Clone the repository
-git clone https://github.com/petebytes/log-essence
+git clone https://github.com/Apsion/log-essence
 cd log-essence
 
 # Install dependencies (requires uv)

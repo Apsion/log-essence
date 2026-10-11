@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0b9] - 2026-10-11
+
+### Added
+- Per-cluster retrieval: `get_raw_logs(cluster_id=N)` returns the raw lines behind one cluster, backed by a per-template line-index map persisted in the tee cache.
+- Cluster retrieval for the Docker, container and journald log tools.
+- `get_logs` output ends with a shared retrieval trailer and a cluster hint, so an agent knows how to drill into a cluster.
+
+### Security
+- cryptography 50.0.1 and joserfc 1.7.5 (transitive), clearing 4 high-severity advisories; plus routine updates to mcp, starlette, pyjwt, urllib3, anyio, gitpython, pillow, pydantic-settings and python-multipart.
+
+### Changed
+- The repository moved to the Apsion organization: https://github.com/Apsion/log-essence. Old URLs redirect.
+- CI runs on self-hosted runners.
+
+## [0.1.0b8] - 2026-04-29
+
+### Fixed
+- `ui` under uvx: detect the uvx persistent tool install path.
+
+## [0.1.0b7] - 2026-04-28
+
+### Changed
+- Replaced the drain3 dependency with a vendored minimal Drain implementation.
+
+## [0.1.0b6] - 2026-04-28
+
+### Fixed
+- `ui` auto-bootstraps streamlit when run via uvx.
+
+## [0.1.0b5] - 2026-04-13
+
+### Fixed
+- Severity and timestamp extraction guard `json.loads` results that are not objects.
+
+## [0.1.0b4] - 2026-03-13
+
+### Added
+- Subcommands: `analytics`, `discover` and `init`.
+
+### Fixed
+- Compatibility with the FastMCP API change (removed `.fn` accessor in tests); `StrEnum` instead of `str` + `Enum`.
+
+## [0.1.0b3] - 2025-12-27
+
+### Changed
+- README no longer states specific compression percentages.
+
+## [0.1.0b2] - 2025-12-27
+
+### Added
+- Automated PyPI publishing, with the version taken from the git tag.
+
 ## [0.1.0b1] - 2025-12-27
 
 Initial beta release of log-essence.
@@ -76,4 +128,12 @@ Initial beta release of log-essence.
 - **Supported Python**: 3.11+
 - **Dependencies**: fastmcp, drain3, fastembed, numpy, tiktoken, pyyaml
 
-[0.1.0b1]: https://github.com/petebytes/log-essence/releases/tag/v0.1.0b1
+[0.1.0b9]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b9
+[0.1.0b8]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b8
+[0.1.0b7]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b7
+[0.1.0b6]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b6
+[0.1.0b5]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b5
+[0.1.0b4]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b4
+[0.1.0b3]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b3
+[0.1.0b2]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b2
+[0.1.0b1]: https://github.com/Apsion/log-essence/releases/tag/v0.1.0b1
