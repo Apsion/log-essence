@@ -58,9 +58,9 @@ ui = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/petebytes/log-essence"
-Repository = "https://github.com/petebytes/log-essence"
-Issues = "https://github.com/petebytes/log-essence/issues"
+Homepage = "https://github.com/Apsion/log-essence"
+Repository = "https://github.com/Apsion/log-essence"
+Issues = "https://github.com/Apsion/log-essence/issues"
 
 [project.scripts]
 log-essence = "log_essence.cli:main"
@@ -74,6 +74,10 @@ source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "src/log_essence/_version.py"
+
+[tool.hatch.build.targets.sdist]
+# Ship source + tests; keep demo media, internal planning docs and CI config out of the PyPI sdist.
+exclude = ["demos", "docs/superpowers", "REPOMAP.md", ".github", "tmp"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/log_essence"]

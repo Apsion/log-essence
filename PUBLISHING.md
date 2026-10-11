@@ -17,7 +17,7 @@ Before publishing, ensure:
 
 ```bash
 # Create on GitHub first, then:
-git remote add origin git@github.com:petebytes/log-essence.git
+git remote add origin git@github.com:Apsion/log-essence.git
 git push -u origin main
 ```
 
@@ -65,7 +65,7 @@ This is the modern, secure way to publish from GitHub Actions without API tokens
 1. Go to PyPI → Your Account → Publishing
 2. Add new pending publisher:
    - PyPI Project Name: `log-essence`
-   - Owner: `petebytes`
+   - Owner: `Apsion` (the repo moved from `petebytes` to the Apsion org on 2026-10-11; the publisher was re-added for `Apsion/log-essence`)
    - Repository: `log-essence`
    - Workflow name: `publish.yml`
    - Environment: `pypi`
@@ -194,7 +194,7 @@ Add these badges at the top of README.md after publishing:
 [![PyPI version](https://badge.fury.io/py/log-essence.svg)](https://pypi.org/project/log-essence/)
 [![Python versions](https://img.shields.io/pypi/pyversions/log-essence.svg)](https://pypi.org/project/log-essence/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/petebytes/log-essence/actions/workflows/ci.yml/badge.svg)](https://github.com/petebytes/log-essence/actions/workflows/ci.yml)
+[![CI](https://github.com/Apsion/log-essence/actions/workflows/ci.yml/badge.svg)](https://github.com/Apsion/log-essence/actions/workflows/ci.yml)
 ```
 
 ### Where to Share
