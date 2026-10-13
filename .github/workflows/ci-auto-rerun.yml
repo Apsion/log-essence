@@ -1,0 +1,16 @@
+# Reruns a failed first attempt once when only checkout/setup steps failed
+# (runner DNS/download flakes); real failures stay red. Logic lives in the org
+# reusable; see apsion-github-org-workflows workflow-templates/ci-auto-rerun.yml.
+name: CI Auto Rerun
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  rerun:
+    uses: Apsion/apsion-github-org-workflows/.github/workflows/org-ci-auto-rerun.yml@9df464ae093f48f7a8d386f5ec42a1343729e89b # main
