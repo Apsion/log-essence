@@ -13,4 +13,4 @@ permissions:
 
 jobs:
   rerun:
-    uses: Apsion/apsion-github-org-workflows/.github/workflows/org-ci-auto-rerun.yml@78c00e46887729d4e95665ca1e8a1c8db4e574eb # main
+    uses: Apsion/apsion-github-org-workflows/.github/workflows/org-ci-auto-rerun.yml@9a91505a370ab721aa937b2d3f976950b1b620dc # main
