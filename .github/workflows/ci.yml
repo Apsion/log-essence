@@ -7,12 +7,10 @@ on:
       - '**/*.md'
       - 'docs/**'
       - '.github/ISSUE_TEMPLATE/**'
+  # No paths-ignore here: a required check comes from this workflow, and a
+  # path-filtered workflow never reports it, leaving docs-only PRs blocked forever.
   pull_request:
     branches: [main]
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.github/ISSUE_TEMPLATE/**'
 
 jobs:
   test:
